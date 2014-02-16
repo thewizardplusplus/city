@@ -5,7 +5,8 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 
 Connection::Connection(const std::string& host_ip, const unsigned short port) :
-	socket(io_service, udp::endpoint(udp::v4(), 0)),
+	local_endpoint(udp::v4(), LOCAL_PORT),
+	socket(io_service, local_endpoint),
 	receiver_endpoint(address::from_string(host_ip), port)
 {}
 
@@ -13,6 +14,22 @@ Connection::~Connection(void) {
 	if (socket.is_open()) {
 		socket.close();
 	}
+}
+
+void Connection::addReceiveMessageListener(
+	const Connection::Listener& listener
+) {
+	ListenerGroup::const_iterator group_begin = listeners.begin();
+	ListenerGroup::const_iterator group_end = listeners.end();
+	if (std::find(group_begin, group_end, listener) == group_end) {
+		listeners.push_back(listener);
+	}
+}
+
+void Connection::removeReceiveMessageListener(
+	const Connection::Listener& listener
+) {
+	listeners.remove(listener);
 }
 
 void Connection::sendMessage(const std::string& message) {
@@ -23,5 +40,10 @@ void Connection::sendMessage(const std::string& message) {
 		buffer(reply_buffer),
 		sender_endpoint
 	);
-	onReceiveMessage(std::string(reply_buffer, reply_length));
+	std::string reply(reply_buffer, reply_length);
+
+	ListenerGroup::const_iterator i = listeners.begin();
+	for (; i != listeners.end(); ++i) {
+		(*i).get()->onReceiveMessage(reply);
+	}
 }

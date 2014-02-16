@@ -5,9 +5,11 @@ CONFIG -= qt
 
 # файлы проекта
 HEADERS += \
-	source/thewizardplusplus/city_client/Connection.h
+	source/thewizardplusplus/city_client/Connection.h \
+	source/thewizardplusplus/city_client/ReceiveMessageListener.h
 SOURCES += \
 	source/thewizardplusplus/city_client/Connection.cpp \
+	source/thewizardplusplus/city_client/ReceiveMessageListener.cpp \
 	source/thewizardplusplus/city_client/main.cpp
 
 # внешние библиотеки
