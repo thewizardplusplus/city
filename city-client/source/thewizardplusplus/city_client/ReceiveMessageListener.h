@@ -8,7 +8,7 @@ namespace city_client {
 
 class ReceiveMessageListener {
 public:
-	typedef boost::shared_ptr<ReceiveMessageListener> Pointer;
+	typedef boost::shared_ptr<ReceiveMessageListener> SmartPointer;
 
 	virtual ~ReceiveMessageListener(void);
 	virtual void onReceiveMessage(const std::string& message) = 0;
