@@ -12,7 +12,7 @@ class Connection {
 public:
 	typedef ReceiveMessageListener::Pointer Listener;
 
-	explicit Connection(const std::string& host_ip, const unsigned short port);
+	explicit Connection(const std::string& host, const unsigned short port);
 	~Connection(void);
 	void addReceiveMessageListener(const Listener& listener);
 	void removeReceiveMessageListener(const Listener& listener);

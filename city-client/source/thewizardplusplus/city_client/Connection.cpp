@@ -1,14 +1,24 @@
 #include "Connection.h"
+#include <boost/lexical_cast.hpp>
 
 using namespace thewizardplusplus::city_client;
+using namespace boost;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-Connection::Connection(const std::string& host_ip, const unsigned short port) :
+Connection::Connection(const std::string& host, const unsigned short port) :
 	local_endpoint(udp::v4(), LOCAL_PORT),
-	socket(io_service, local_endpoint),
-	receiver_endpoint(address::from_string(host_ip), port)
-{}
+	socket(io_service, local_endpoint)
+{
+	udp::resolver resolver(io_service);
+	udp::resolver::query query(
+		udp::v4(),
+		host,
+		lexical_cast<std::string>(port)
+	);
+	udp::resolver::iterator iterator = resolver.resolve(query);
+	receiver_endpoint = *iterator;
+}
 
 Connection::~Connection(void) {
 	if (socket.is_open()) {
