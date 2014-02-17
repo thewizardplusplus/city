@@ -7,11 +7,13 @@ CONFIG -= qt
 HEADERS += \
 	source/thewizardplusplus/city_client/ConnectionPrivate.h \
 	source/thewizardplusplus/city_client/ReceiveMessageListener.h \
+	source/thewizardplusplus/city_client/EchoListener.h \
 	source/thewizardplusplus/city_client/ReceiveMessageListenerGroup.h \
 	source/thewizardplusplus/city_client/Connection.h
 SOURCES += \
 	source/thewizardplusplus/city_client/ConnectionPrivate.cpp \
 	source/thewizardplusplus/city_client/ReceiveMessageListener.cpp \
+	source/thewizardplusplus/city_client/EchoListener.cpp \
 	source/thewizardplusplus/city_client/ReceiveMessageListenerGroup.cpp \
 	source/thewizardplusplus/city_client/Connection.cpp \
 	source/thewizardplusplus/city_client/main.cpp
