@@ -46,6 +46,5 @@ std::string ConnectionPrivate::receive(void) {
 		buffer(reply_buffer),
 		sender_endpoint
 	);
-
 	return std::string(reply_buffer, reply_length);
 }
