@@ -15,6 +15,9 @@ public:
 
 private:
 	boost::shared_ptr<ConnectionPrivate> connection;
+
+	void send(const std::string& message);
+	std::string receive(void);
 };
 
 }
