@@ -4,7 +4,6 @@
 
 using namespace thewizardplusplus::city_client::exceptions;
 using namespace boost;
-using namespace boost::algorithm;
 
 ReceiveException::ReceiveException(const std::string& message) :
 	CityClientException(
