@@ -25,7 +25,7 @@ SOURCES += \
 	source/thewizardplusplus/city_client/main.cpp
 
 # внешние библиотеки
-LIBS += -lboost_system -lpthread
+LIBS += -lboost_program_options -lboost_system -lpthread
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
