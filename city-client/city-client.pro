@@ -4,7 +4,7 @@ CONFIG += warn_on
 CONFIG -= qt
 
 # файлы проекта
-SOURCES += source/thewizardplusplus/city_client/main.cpp
+SOURCES += source/main.cpp
 
 # внешние библиотеки
 LIBS += -lboost_program_options -lboost_system -lpthread

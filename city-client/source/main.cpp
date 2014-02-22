@@ -16,6 +16,8 @@ typedef
 	tuple<shared_ptr<io_service>, shared_ptr<udp::socket>, udp::endpoint>
 	ConnectionContext;
 
+static const size_t MAXIMAL_REPLY_LENGTH = 1024;
+
 void ProcessError(const std::string& message) {
 	std::cerr
 		<< format("City client error: %s.")
@@ -73,7 +75,7 @@ void SendMessage(
 		connection_context.get<2>()
 	);
 
-	char reply_buffer[1024];
+	char reply_buffer[MAXIMAL_REPLY_LENGTH];
 	udp::endpoint sender_endpoint;
 	size_t reply_length = connection_context.get<1>()->receive_from(
 		buffer(reply_buffer),
@@ -102,6 +104,16 @@ void StartRepl(const ConnectionContext& connection_context) {
 				throw std::runtime_error(
 					"City client error: not allowed send an empty message."
 				);
+			}
+			if (message.length() > MAXIMAL_REPLY_LENGTH) {
+				std::cerr
+					<< format(
+						"City client warning: "
+						"too long message; "
+						"allowed only %u characters; "
+						"message will be truncated.\n"
+					) % MAXIMAL_REPLY_LENGTH;
+				message = message.substr(0, MAXIMAL_REPLY_LENGTH);
 			}
 
 			SendMessage(connection_context, message);
