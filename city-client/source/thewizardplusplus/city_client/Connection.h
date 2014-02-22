@@ -10,7 +10,7 @@ class ConnectionPrivate;
 
 class Connection {
 public:
-	explicit Connection(const std::string& host, const unsigned short port);
+	Connection(const std::string& host, const unsigned short port);
 	std::string sendMessage(const std::string& message);
 
 private:

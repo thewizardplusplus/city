@@ -9,7 +9,7 @@ namespace exceptions {
 
 class ReceiveException : public CityClientException {
 public:
-	ReceiveException(const std::string& message);
+	explicit ReceiveException(const std::string& message);
 };
 
 }

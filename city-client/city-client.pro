@@ -12,7 +12,11 @@ HEADERS += \
 	source/thewizardplusplus/city_client/exceptions/EmptyMessageException.h \
 	source/thewizardplusplus/city_client/exceptions/UnknownCommandException.h \
 	source/thewizardplusplus/city_client/ConnectionPrivate.h \
-	source/thewizardplusplus/city_client/Connection.h
+	source/thewizardplusplus/city_client/Connection.h \
+	source/thewizardplusplus/city_client/CommandLineArguments.h \
+	source/thewizardplusplus/city_client/ConnectionOptions.h \
+	source/thewizardplusplus/city_client/OptionsProcessorPrivate.h \
+	source/thewizardplusplus/city_client/OptionsProcessor.h
 SOURCES += \
 	source/thewizardplusplus/city_client/exceptions/CityClientException.cpp \
 	source/thewizardplusplus/city_client/exceptions/HostResolveException.cpp \
@@ -22,6 +26,10 @@ SOURCES += \
 	source/thewizardplusplus/city_client/exceptions/UnknownCommandException.cpp \
 	source/thewizardplusplus/city_client/ConnectionPrivate.cpp \
 	source/thewizardplusplus/city_client/Connection.cpp \
+	source/thewizardplusplus/city_client/CommandLineArguments.cpp \
+	source/thewizardplusplus/city_client/ConnectionOptions.cpp \
+	source/thewizardplusplus/city_client/OptionsProcessorPrivate.cpp \
+	source/thewizardplusplus/city_client/OptionsProcessor.cpp \
 	source/thewizardplusplus/city_client/main.cpp
 
 # внешние библиотеки

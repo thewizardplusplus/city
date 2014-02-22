@@ -9,7 +9,7 @@ namespace exceptions {
 
 class UnknownCommandException : public CityClientException {
 public:
-	UnknownCommandException(const std::string& command);
+	explicit UnknownCommandException(const std::string& command);
 };
 
 }

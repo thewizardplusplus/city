@@ -9,7 +9,7 @@ namespace exceptions {
 
 class SendException : public CityClientException {
 public:
-	SendException(const std::string& message);
+	explicit SendException(const std::string& message);
 };
 
 }

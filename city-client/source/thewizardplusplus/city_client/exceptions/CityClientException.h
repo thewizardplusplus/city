@@ -9,7 +9,7 @@ namespace exceptions {
 
 class CityClientException : public std::runtime_error {
 public:
-	CityClientException(const std::string& message);
+	explicit CityClientException(const std::string& message);
 };
 
 }
