@@ -3,36 +3,29 @@
 
 #include "CommandLineArguments.h"
 #include "ConnectionOptions.h"
-#include <boost/program_options.hpp>
+#include "GenericOptionsParser.h"
+#include "ConnectionOptionsParser.h"
 
 namespace thewizardplusplus {
 namespace city_client {
 
 class OptionsProcessorPrivate {
 public:
-	OptionsProcessorPrivate(void);
 	ConnectionOptions process(const CommandLineArguments& arguments);
 
 private:
-	boost::program_options::options_description generic_options;
-	boost::program_options::options_description connection_options;
-	boost::program_options::options_description all_options;
+	GenericOptionsParser generic_options_parser;
+	ConnectionOptionsParser connection_options_parser;
 
-	void defineGenericOptions(void);
-	void defineConnectionOptions(void);
-	void processGenericOptions(const CommandLineArguments& arguments) const;
-	boost::program_options::variables_map parseGenericOptions(
-		const CommandLineArguments& arguments
+	void processGenericOptions(
+		const boost::program_options::variables_map& parameters
+	) const;
+	ConnectionOptions processConnectionOptions(
+		const boost::program_options::variables_map& parameters
 	) const;
 	void showVersion(void) const;
 	void showHelp(void) const;
 	void showShortHelp(void) const;
-	ConnectionOptions processConnectionOptions(
-		const CommandLineArguments& arguments
-	) const;
-	boost::program_options::variables_map parseConnectionOptions(
-		const CommandLineArguments& arguments
-	) const;
 };
 
 }

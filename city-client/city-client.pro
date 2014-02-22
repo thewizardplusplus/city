@@ -14,6 +14,9 @@ HEADERS += \
 	source/thewizardplusplus/city_client/ConnectionPrivate.h \
 	source/thewizardplusplus/city_client/Connection.h \
 	source/thewizardplusplus/city_client/CommandLineArguments.h \
+	source/thewizardplusplus/city_client/OptionsParser.h \
+	source/thewizardplusplus/city_client/GenericOptionsParser.h \
+	source/thewizardplusplus/city_client/ConnectionOptionsParser.h \
 	source/thewizardplusplus/city_client/ConnectionOptions.h \
 	source/thewizardplusplus/city_client/OptionsProcessorPrivate.h \
 	source/thewizardplusplus/city_client/OptionsProcessor.h
@@ -27,6 +30,9 @@ SOURCES += \
 	source/thewizardplusplus/city_client/ConnectionPrivate.cpp \
 	source/thewizardplusplus/city_client/Connection.cpp \
 	source/thewizardplusplus/city_client/CommandLineArguments.cpp \
+	source/thewizardplusplus/city_client/OptionsParser.cpp \
+	source/thewizardplusplus/city_client/GenericOptionsParser.cpp \
+	source/thewizardplusplus/city_client/ConnectionOptionsParser.cpp \
 	source/thewizardplusplus/city_client/ConnectionOptions.cpp \
 	source/thewizardplusplus/city_client/OptionsProcessorPrivate.cpp \
 	source/thewizardplusplus/city_client/OptionsProcessor.cpp \

@@ -3,57 +3,38 @@
 using namespace thewizardplusplus::city_client;
 using namespace boost::program_options;
 
-OptionsProcessorPrivate::OptionsProcessorPrivate(void) :
-	generic_options("Generic options"),
-	connection_options("Connection options")
-{
-	defineGenericOptions();
-	defineConnectionOptions();
-
-	all_options.add(generic_options).add(connection_options);
-}
-
 ConnectionOptions OptionsProcessorPrivate::process(
 	const CommandLineArguments& arguments
 ) {
-	processGenericOptions(arguments);
+	variables_map generic_parameters = generic_options_parser.parse(arguments);
+	processGenericOptions(generic_parameters);
 
-	ConnectionOptions connection_options = processConnectionOptions(arguments);
-	return connection_options;
-}
-
-void OptionsProcessorPrivate::defineGenericOptions(void) {
-	generic_options.add_options()
-		("version,v", " - show version;")
-		("help,h", " - show help.");
-}
-
-void OptionsProcessorPrivate::defineConnectionOptions(void) {
-	connection_options.add_options()
-		(
-			"host",
-			value<std::string>()->required(),
-			" - host name or IP (required);"
-		)
-		(
-			"port",
-			value<unsigned short>()->required(),
-			" - port number (required)."
-		);
+	variables_map connection_parameters = connection_options_parser.parse(
+		arguments
+	);
+	return processConnectionOptions(connection_parameters);
 }
 
 void OptionsProcessorPrivate::processGenericOptions(
-	const CommandLineArguments& arguments
+	const variables_map& parameters
 ) const {
-	variables_map generic_parameters = parseGenericOptions(arguments);
-	if (generic_parameters.count("version")) {
+	if (parameters.count("version")) {
 		showVersion();
 		std::exit(EXIT_SUCCESS);
 	}
-	if (generic_parameters.count("help")) {
+	if (parameters.count("help")) {
 		showHelp();
 		std::exit(EXIT_SUCCESS);
 	}
+}
+
+ConnectionOptions OptionsProcessorPrivate::processConnectionOptions(
+	const variables_map& parameters
+) const {
+	std::string host = parameters["host"].as<std::string>();
+	unsigned short port = parameters["port"].as<unsigned short>();
+
+	return ConnectionOptions(host, port);
 }
 
 void OptionsProcessorPrivate::showVersion(void) const {
@@ -72,51 +53,13 @@ void OptionsProcessorPrivate::showShortHelp(void) const {
 	std::cout
 		<< "Usage:\n"
 		<< "  city-client [options]\n"
-		<< all_options
+		<< "\n"
+		<< generic_options_parser.getDescription()
+		<< "\n"
+		<< connection_options_parser.getDescription()
 		<< "\n"
 		<< "Commands (REPL):\n"
 		<< "  send arg               - send message;\n"
 		<< "  exit                   - exit.\n"
 		<< "\n";
-}
-
-variables_map OptionsProcessorPrivate::parseGenericOptions(
-	const CommandLineArguments& arguments
-) const {
-	variables_map generic_parameters;
-	store(
-		command_line_parser(arguments.getArguments())
-			.options(generic_options)
-			.allow_unregistered()
-			.run(),
-		generic_parameters
-	);
-	notify(generic_parameters);
-
-	return generic_parameters;
-}
-
-ConnectionOptions OptionsProcessorPrivate::processConnectionOptions(
-	const CommandLineArguments& arguments
-) const {
-	variables_map connection_parameters = parseConnectionOptions(arguments);
-	std::string host = connection_parameters["host"].as<std::string>();
-	unsigned short port = connection_parameters["port"].as<unsigned short>();
-
-	return ConnectionOptions(host, port);
-}
-
-variables_map OptionsProcessorPrivate::parseConnectionOptions(
-	const CommandLineArguments& arguments
-) const {
-	variables_map connection_parameters;
-	store(
-		command_line_parser(arguments.getArguments())
-			.options(connection_options)
-			.run(),
-		connection_parameters
-	);
-	notify(connection_parameters);
-
-	return connection_parameters;
 }

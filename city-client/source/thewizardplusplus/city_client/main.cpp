@@ -48,10 +48,11 @@ int main(int arguments_number, char** arguments) try {
 	std::cout << format("Host: \"%s\".\n") % connection_options.getHost();
 	std::cout << format("Port: %u.\n") % connection_options.getPort();
 
-	ReplStart();
+	//ReplStart();
 } catch(const std::exception& exception) {
 	std::cerr
-		<< format("City client unknown error: %s.")
+		<< format("City client unknown error (%s): %s.")
+			% typeid(exception).name()
 			% to_lower_copy(std::string(exception.what()))
 		<< std::endl;
 }

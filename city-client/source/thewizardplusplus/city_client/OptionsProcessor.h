@@ -1,7 +1,7 @@
 #ifndef OPTIONSPROCESSOR_H
 #define OPTIONSPROCESSOR_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "CommandLineArguments.h"
 #include "ConnectionOptions.h"
@@ -17,7 +17,7 @@ public:
 	ConnectionOptions process(const CommandLineArguments& arguments);
 
 private:
-	boost::shared_ptr<OptionsProcessorPrivate> processor;
+	std::auto_ptr<OptionsProcessorPrivate> processor;
 };
 
 }

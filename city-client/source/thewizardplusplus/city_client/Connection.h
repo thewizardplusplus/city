@@ -1,7 +1,8 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include <boost/shared_ptr.hpp>
+#include <string>
+#include <memory>
 
 namespace thewizardplusplus {
 namespace city_client {
@@ -14,7 +15,7 @@ public:
 	std::string sendMessage(const std::string& message);
 
 private:
-	boost::shared_ptr<ConnectionPrivate> connection;
+	std::auto_ptr<ConnectionPrivate> connection;
 
 	void send(const std::string& message);
 	std::string receive(void);
