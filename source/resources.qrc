@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>app_icon.svg</file>
+        <file>send_button_icon.svg</file>
+    </qresource>
+</RCC>

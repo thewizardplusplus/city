@@ -1,13 +1,20 @@
 # общие настройки
-CONFIG += console
 CONFIG += warn_on
-CONFIG -= qt
 
 # файлы проекта
-SOURCES += source/main.cpp
-
-# внешние библиотеки
-LIBS += -lboost_program_options -lboost_system -lpthread
+HEADERS += \
+	source/Message.h \
+	source/MainWindow.h
+SOURCES += \
+	source/Message.cpp \
+	source/MainWindow.cpp \
+	source/main.cpp
+FORMS += \
+	source/MainWindow.ui
+RESOURCES += \
+	source/resources.qrc
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
+# для игнорирования варнингов в хедерах Qt
+QMAKE_CXXFLAGS += -Wno-long-long
