@@ -3,13 +3,16 @@ CONFIG += warn_on
 
 # файлы проекта
 HEADERS += \
+	source/StartWindow.h \
 	source/Message.h \
 	source/MainWindow.h
 SOURCES += \
+	source/StartWindow.cpp \
 	source/Message.cpp \
 	source/MainWindow.cpp \
 	source/main.cpp
 FORMS += \
+	source/StartWindow.ui \
 	source/MainWindow.ui
 RESOURCES += \
 	source/resources.qrc

@@ -1,3 +1,4 @@
+#include "StartWindow.h"
 #include "MainWindow.h"
 #include <QtGui/QApplication>
 #include <QtCore/QTranslator>
@@ -13,8 +14,16 @@ int main(int arguments_number, char* arguments[]) {
 	);
 	application.installTranslator(&translator);
 
+	StartWindow start_window;
 	MainWindow main_window;
-	main_window.show();
+	QObject::connect(
+		&start_window,
+		SIGNAL(login(QString)),
+		&main_window,
+		SLOT(start(QString))
+	);
+
+	start_window.show();
 
 	int exit_code = application.exec();
 	return exit_code;

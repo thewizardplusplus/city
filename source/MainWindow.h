@@ -15,6 +15,7 @@ signals:
 	void message(const Message& message);
 
 public slots:
+	void start(const QString& nickname);
 	void setInterlocutors(const QStringList& interlocutors);
 	void addMessages(const Message::Group& messages);
 
@@ -25,13 +26,14 @@ private:
 	static const QString MESSAGE_TEMPLATE;
 
 	Ui::MainWindow ui;
-	bool processed;
+	bool first_time_show;
+	QString nickname;
 
 	void addMessage(const Message& message);
 
 private slots:
-	void selectInterlocutor(QListWidgetItem* item);
-	void updateSendButton(void);
-	void sendMessage(void);
+	void on_interlocutors_view_itemClicked(QListWidgetItem* item);
+	void on_message_editor_textChanged(void);
+	void on_send_button_clicked(void);
 };
 #endif

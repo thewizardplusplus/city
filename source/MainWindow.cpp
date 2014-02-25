@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 #include <QtGui/QDesktopWidget>
 #include <QtCore/QDateTime>
-#include <QtCore/QDebug>
 
 const QString MainWindow::MESSAGE_TEMPLATE =
 	"<p>"
@@ -13,25 +12,14 @@ const QString MainWindow::MESSAGE_TEMPLATE =
 
 MainWindow::MainWindow(void) :
 	QMainWindow(NULL),
-	processed(false)
+	first_time_show(true)
 {
 	ui.setupUi(this);
 	ui.message_editor->installEventFilter(this);
 	ui.message_editor->setFocus();
 
-	connect(
-		ui.interlocutors_view,
-		SIGNAL(itemClicked(QListWidgetItem*)),
-		this,
-		SLOT(selectInterlocutor(QListWidgetItem*))
-	);
-	connect(
-		ui.message_editor,
-		SIGNAL(textChanged()),
-		this,
-		SLOT(updateSendButton())
-	);
-	connect(ui.send_button, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	//TODO: remove this line
+	ui.interlocutors_view->addItems(QStringList() << "test1" << "test2");
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event) {
@@ -39,7 +27,7 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
 		QKeyEvent* key_event = static_cast<QKeyEvent*>(event);
 		if (key_event->key() == Qt::Key_Return) {
 			if (!(key_event->modifiers() & Qt::ShiftModifier)) {
-				sendMessage();
+				on_send_button_clicked();
 			} else {
 				ui.message_editor->textCursor().insertText("\n");
 			}
@@ -49,6 +37,12 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
 	}
 
 	return QMainWindow::eventFilter(object, event);
+}
+
+void MainWindow::start(const QString& nickname) {
+	this->nickname = nickname;
+	setWindowTitle(QString("%1 - %2").arg(windowTitle()).arg(nickname));
+	show();
 }
 
 void MainWindow::setInterlocutors(const QStringList& interlocutors) {
@@ -68,7 +62,7 @@ void MainWindow::addMessages(const Message::Group& messages) {
 void MainWindow::showEvent(QShowEvent* event) {
 	(void)event;
 
-	if (!processed) {
+	if (first_time_show) {
 		QRect desktop_rectangle = QApplication::desktop()->availableGeometry();
 		resize(desktop_rectangle.size() / 2);
 		move(desktop_rectangle.center() - rect().center());
@@ -79,14 +73,14 @@ void MainWindow::showEvent(QShowEvent* event) {
 		size = ui.views_splitter->width() / 3;
 		ui.views_splitter->setSizes(QList<int>() << 2 * size << size);
 
-		processed = true;
+		first_time_show = false;
 	}
 }
 
 void MainWindow::addMessage(const Message& message) {
 	QString text = message.text;
-	text.replace(QRegExp("@(\\w+)\\b"), "<strong>\\1</strong>");
-	text.replace("\n", "<br />");
+	text.replace(QRegExp("%(\\w+)%"), "<strong>\\1</strong>");
+	text.replace(QRegExp("\r?\n\r?"), "<br />");
 
 	ui.chat_view->append(
 		MESSAGE_TEMPLATE
@@ -96,22 +90,24 @@ void MainWindow::addMessage(const Message& message) {
 	);
 }
 
-void MainWindow::selectInterlocutor(QListWidgetItem* item) {
-	ui.message_editor->textCursor().insertText("@" + item->text());
+void MainWindow::on_interlocutors_view_itemClicked(QListWidgetItem* item) {
+	ui.message_editor->textCursor().insertText(
+		QString("%%1%").arg(item->text())
+	);
 }
 
-void MainWindow::updateSendButton(void) {
+void MainWindow::on_message_editor_textChanged(void) {
 	ui.send_button->setEnabled(!ui.message_editor->toPlainText().isEmpty());
 }
 
-void MainWindow::sendMessage(void) {
+void MainWindow::on_send_button_clicked(void) {
 	QString text = ui.message_editor->toPlainText();
 	if (!text.isEmpty()) {
 		ui.message_editor->clear();
-		emit message(Message(trUtf8("Я"), QDateTime::currentDateTime(), text));
+		ui.message_editor->setFocus();
 
-		addMessage(Message(trUtf8("Я"), QDateTime::currentDateTime(), text));
+		emit message(Message(nickname, QDateTime::currentDateTime(), text));
+		//TODO: remove this line
+		addMessage(Message(nickname, QDateTime::currentDateTime(), text));
 	}
-
-	ui.message_editor->setFocus();
 }
