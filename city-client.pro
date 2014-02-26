@@ -5,17 +5,22 @@ CONFIG += warn_on
 HEADERS += \
 	source/StartWindow.h \
 	source/Message.h \
-	source/MainWindow.h
+	source/MainWindow.h \
+	source/Connection.h
 SOURCES += \
 	source/StartWindow.cpp \
 	source/Message.cpp \
 	source/MainWindow.cpp \
+	source/Connection.cpp \
 	source/main.cpp
 FORMS += \
 	source/StartWindow.ui \
 	source/MainWindow.ui
 RESOURCES += \
 	source/resources.qrc
+
+# внешние библиотеки
+LIBS += -lboost_program_options -lboost_system -lpthread
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
