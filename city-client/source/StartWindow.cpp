@@ -25,7 +25,6 @@ void StartWindow::on_nickname_editor_textEdited(const QString& text) {
 }
 
 void StartWindow::on_login_button_clicked(void) {
-	//ui.central_widget->setEnabled(false);
 	hide();
 	emit login(ui.nickname_editor->text());
 }
