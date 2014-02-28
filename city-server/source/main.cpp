@@ -13,6 +13,7 @@ using namespace boost::algorithm;
 typedef std::map<std::string, time_t> InterlocutorTimestampGroup;
 
 static const size_t MAXIMAL_MESSAGE_LENGTH = 1024;
+static const time_t MAXIMAL_INTERLOCUTOR_TIMEOUT = 10;
 
 InterlocutorTimestampGroup interlocutor_timestamps;
 
@@ -76,6 +77,20 @@ void ProcessMessage(
 	}
 }
 
+void RemoveLostInterlocutors(void) {
+	time_t current_timestamp = std::time(NULL);
+	InterlocutorTimestampGroup::iterator i = interlocutor_timestamps.begin();
+	while (
+		!interlocutor_timestamps.empty() && i != interlocutor_timestamps.end()
+	) {
+		if (current_timestamp - i->second >= MAXIMAL_INTERLOCUTOR_TIMEOUT) {
+			interlocutor_timestamps.erase(i++);
+		} else {
+			++i;
+		}
+	}
+}
+
 void StartServer(unsigned short port) {
 	io_service service;
 	udp::socket socket(service, udp::endpoint(udp::v4(), port));
@@ -93,6 +108,8 @@ void StartServer(unsigned short port) {
 			socket,
 			sender_endpoint
 		);
+
+		RemoveLostInterlocutors();
 	} catch(const std::exception& exception) {
 		std::string message = (format("City server error: %s.")
 			% to_lower_copy(std::string(exception.what()))).str();
