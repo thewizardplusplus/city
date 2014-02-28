@@ -1,5 +1,8 @@
+#include <boost/tuple/tuple.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
+#include <boost/range/adaptor/map.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <iostream>
@@ -8,14 +11,25 @@ using namespace boost;
 using namespace boost::program_options;
 using namespace boost::asio;
 using namespace boost::asio::ip;
+using namespace boost::adaptors;
 using namespace boost::algorithm;
 
+typedef
+	tuple<shared_ptr<io_service>, shared_ptr<udp::socket>, udp::endpoint>
+	ConnectionContext;
 typedef std::map<std::string, time_t> InterlocutorTimestampGroup;
 
 static const size_t MAXIMAL_MESSAGE_LENGTH = 1024;
 static const time_t MAXIMAL_INTERLOCUTOR_TIMEOUT = 10;
+static const char MESSAGE_PARTS_SEPARATOR = '/';
 
 InterlocutorTimestampGroup interlocutor_timestamps;
+
+void ProcessError(const std::string& message) {
+	std::cerr
+		<< format("City client error: %s.\n")
+			% to_lower_copy(message);
+}
 
 unsigned short ParseCommandLineArguments(
 	int arguments_number,
@@ -37,26 +51,28 @@ unsigned short ParseCommandLineArguments(
 	return parameters["port"].as<unsigned short>();
 }
 
-void ProcessCommandInterlocutors(udp::socket& socket, udp::endpoint& endpoint) {
-	std::string reply;
-	InterlocutorTimestampGroup::const_iterator i =
-		interlocutor_timestamps.begin();
-	for (; i != interlocutor_timestamps.end(); ++i) {
-		reply += i->first + '/';
-	}
-	if (!reply.empty()) {
-		reply = reply.substr(0, reply.length() - 1);
-	} else {
-		reply = "empty";
-	}
+ConnectionContext OpenConnection(unsigned short port) {
+	shared_ptr<io_service> service(new io_service());
+	return make_tuple(
+		service,
+		new udp::socket(*service.get(), udp::endpoint(udp::v4(), port)),
+		udp::endpoint()
+	);
+}
 
-	socket.send_to(buffer(reply), endpoint);
+void SendReply(
+	const ConnectionContext& connection_context,
+	const std::string& reply
+) {
+	connection_context.get<1>()->send_to(
+		buffer(reply),
+		connection_context.get<2>()
+	);
 }
 
 void ProcessMessage(
-	const std::string& message,
-	udp::socket& socket,
-	udp::endpoint& endpoint
+	const ConnectionContext& connection_context,
+	const std::string& message
 ) {
 	std::vector<std::string> message_parts;
 	split(message_parts, message, is_any_of("/"), token_compress_on);
@@ -65,11 +81,17 @@ void ProcessMessage(
 	}
 
 	std::string nickname = message_parts[0];
-	interlocutor_timestamps[nickname] = std::time(NULL);
+	if (nickname.empty()) {
+		throw std::runtime_error("invalid nickname");
+	}
 
 	std::string command = message_parts[1];
 	if (command == "interlocutors") {
-		ProcessCommandInterlocutors(socket, endpoint);
+		interlocutor_timestamps[nickname] = std::time(NULL);
+		SendReply(
+			connection_context,
+			join(interlocutor_timestamps | map_keys, "/")
+		);
 	} else {
 		throw std::runtime_error(
 			(format("unknown command \"%s\"") % command).str()
@@ -78,11 +100,9 @@ void ProcessMessage(
 }
 
 void RemoveLostInterlocutors(void) {
-	time_t current_timestamp = std::time(NULL);
 	InterlocutorTimestampGroup::iterator i = interlocutor_timestamps.begin();
-	while (
-		!interlocutor_timestamps.empty() && i != interlocutor_timestamps.end()
-	) {
+	time_t current_timestamp = std::time(NULL);
+	while (i != interlocutor_timestamps.end()) {
 		if (current_timestamp - i->second >= MAXIMAL_INTERLOCUTOR_TIMEOUT) {
 			interlocutor_timestamps.erase(i++);
 		} else {
@@ -91,30 +111,26 @@ void RemoveLostInterlocutors(void) {
 	}
 }
 
-void StartServer(unsigned short port) {
-	io_service service;
-	udp::socket socket(service, udp::endpoint(udp::v4(), port));
-	udp::endpoint sender_endpoint;
-
+void StartServer(ConnectionContext& connection_context) {
 	while (true) try {
 		char message_buffer[MAXIMAL_MESSAGE_LENGTH];
-		size_t message_length = socket.receive_from(
+		size_t message_length = connection_context.get<1>()->receive_from(
 			buffer(message_buffer),
-			sender_endpoint
+			connection_context.get<2>()
 		);
 
 		ProcessMessage(
-			std::string(message_buffer, message_length),
-			socket,
-			sender_endpoint
+			connection_context,
+			std::string(message_buffer, message_length)
 		);
 
 		RemoveLostInterlocutors();
 	} catch(const std::exception& exception) {
-		std::string message = (format("City server error: %s.")
-			% to_lower_copy(std::string(exception.what()))).str();
-		std::cerr << message << std::endl;
-		socket.send_to(buffer(message), sender_endpoint);
+		ProcessError(exception.what());
+		SendReply(
+			connection_context,
+			(format("error/%s") % exception.what()).str()
+		);
 	}
 }
 
@@ -123,10 +139,8 @@ int main(int arguments_number, char* arguments[]) try {
 		arguments_number,
 		arguments
 	);
-	StartServer(port);
+	ConnectionContext connection_context = OpenConnection(port);
+	StartServer(connection_context);
 } catch(const std::exception& exception) {
-	std::cerr
-		<< format("City server error: %s.")
-			% to_lower_copy(std::string(exception.what()))
-		<< std::endl;
+	ProcessError(exception.what());
 }
