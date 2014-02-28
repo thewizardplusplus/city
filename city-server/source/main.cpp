@@ -75,7 +75,12 @@ void ProcessMessage(
 	const std::string& message
 ) {
 	std::vector<std::string> message_parts;
-	split(message_parts, message, is_any_of("/"), token_compress_on);
+	split(
+		message_parts,
+		message,
+		is_any_of(std::string(1, MESSAGE_PARTS_SEPARATOR)),
+		token_compress_on
+	);
 	if (message_parts.size() < 2) {
 		throw std::runtime_error("missed command");
 	}
@@ -90,7 +95,10 @@ void ProcessMessage(
 		interlocutor_timestamps[nickname] = std::time(NULL);
 		SendReply(
 			connection_context,
-			join(interlocutor_timestamps | map_keys, "/")
+			join(
+				interlocutor_timestamps | map_keys,
+				std::string(1, MESSAGE_PARTS_SEPARATOR)
+			)
 		);
 	} else {
 		throw std::runtime_error(
@@ -129,7 +137,9 @@ void StartServer(ConnectionContext& connection_context) {
 		ProcessError(exception.what());
 		SendReply(
 			connection_context,
-			(format("error/%s") % exception.what()).str()
+			(format("error%c%s")
+				% MESSAGE_PARTS_SEPARATOR
+				% exception.what()).str()
 		);
 	}
 }
