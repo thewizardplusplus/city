@@ -1,29 +1,37 @@
-#include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/program_options.hpp>
 #include <boost/asio.hpp>
-#include <boost/range/adaptor/map.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/program_options.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/regex.hpp>
 #include <iostream>
 
 using namespace boost;
-using namespace boost::program_options;
 using namespace boost::asio;
 using namespace boost::asio::ip;
-using namespace boost::adaptors;
 using namespace boost::algorithm;
+using namespace boost::program_options;
+using namespace boost::adaptors;
 
 typedef
 	tuple<shared_ptr<io_service>, shared_ptr<udp::socket>, udp::endpoint>
 	ConnectionContext;
 typedef std::map<std::string, time_t> InterlocutorTimestampGroup;
+typedef tuple<std::string, std::string> Message;
+typedef std::map<time_t, Message> MessageGroup;
+typedef tuple<InterlocutorTimestampGroup, MessageGroup> ServerData;
 
+static const char MESSAGE_PARTS_SEPARATOR = ';';
+static const regex TIMESTAMP_PATTERN("^[1-9]\\d*$");
+static const char MESSAGE_PARTS_INNER_SEPARATOR = ':';
+static const time_t MAXIMAL_INTERLOCUTOR_TIMEOUT = 12;
 static const size_t MAXIMAL_MESSAGE_LENGTH = 1024;
-static const time_t MAXIMAL_INTERLOCUTOR_TIMEOUT = 10;
-static const char MESSAGE_PARTS_SEPARATOR = '/';
 
-InterlocutorTimestampGroup interlocutor_timestamps;
+std::string ConvertCharToString(char symbol) {
+	return std::string(1, symbol);
+}
 
 void ProcessError(const std::string& message) {
 	std::cerr
@@ -70,49 +78,96 @@ void SendReply(
 	);
 }
 
+void AddOrUpdateInterlocutor(
+	ServerData& server_data,
+	const std::string& nickname
+) {
+	server_data.get<0>()[nickname] = std::time(NULL);
+}
+
 void ProcessMessage(
 	const ConnectionContext& connection_context,
+	ServerData& server_data,
 	const std::string& message
 ) {
 	std::vector<std::string> message_parts;
 	split(
 		message_parts,
 		message,
-		is_any_of(std::string(1, MESSAGE_PARTS_SEPARATOR)),
+		is_any_of(ConvertCharToString(MESSAGE_PARTS_SEPARATOR)),
 		token_compress_on
 	);
-	if (message_parts.size() < 2) {
+	if (message_parts.empty() || message_parts[0].empty()) {
+		throw std::runtime_error("missed nickname");
+	}
+	if (message_parts.size() < 2 || message_parts[1].empty()) {
 		throw std::runtime_error("missed command");
 	}
 
 	std::string nickname = message_parts[0];
-	if (nickname.empty()) {
-		throw std::runtime_error("invalid nickname");
-	}
-
 	std::string command = message_parts[1];
 	if (command == "interlocutors") {
-		interlocutor_timestamps[nickname] = std::time(NULL);
+		AddOrUpdateInterlocutor(server_data, nickname);
 		SendReply(
 			connection_context,
 			join(
-				interlocutor_timestamps | map_keys,
-				std::string(1, MESSAGE_PARTS_SEPARATOR)
+				server_data.get<0>() | map_keys,
+				ConvertCharToString(MESSAGE_PARTS_SEPARATOR)
 			)
 		);
-	} else {
-		throw std::runtime_error(
-			(format("unknown command \"%s\"") % command).str()
+	} else if (command == "message") {
+		if (message_parts.size() < 3 || message_parts[2].empty()) {
+			throw std::runtime_error("missed message text");
+		}
+
+		AddOrUpdateInterlocutor(server_data, nickname);
+		server_data.get<1>()[std::time(NULL)] = Message(
+			nickname,
+			message_parts[2]
 		);
+		SendReply(connection_context, "ok");
+	} else if (command == "history") {
+		if (message_parts.size() < 3 || message_parts[2].empty()) {
+			throw std::runtime_error("missed timestamp");
+		}
+
+		std::string timestamp = message_parts[2];
+		if (!regex_match(timestamp, TIMESTAMP_PATTERN)) {
+			throw std::runtime_error("invalid timestamp");
+		}
+
+		AddOrUpdateInterlocutor(server_data, nickname);
+
+		std::string reply;
+		MessageGroup::const_iterator i = server_data.get<1>().upper_bound(
+			lexical_cast<time_t>(timestamp)
+		);
+		for (; i != server_data.get<1>().end(); ++i) {
+			reply +=
+				(format("%s%c%u%c%s%c")
+					% i->second.get<0>()
+					% MESSAGE_PARTS_INNER_SEPARATOR
+					% i->first
+					% MESSAGE_PARTS_INNER_SEPARATOR
+					% i->second.get<1>()
+					% MESSAGE_PARTS_SEPARATOR).str();
+		}
+		if (!reply.empty()) {
+			reply = reply.substr(0, reply.length() - 1);
+		}
+
+		SendReply(connection_context, reply);
+	} else {
+		throw std::runtime_error("invalid command");
 	}
 }
 
-void RemoveLostInterlocutors(void) {
-	InterlocutorTimestampGroup::iterator i = interlocutor_timestamps.begin();
+void RemoveLostInterlocutors(ServerData& server_data) {
+	InterlocutorTimestampGroup::iterator i = server_data.get<0>().begin();
 	time_t current_timestamp = std::time(NULL);
-	while (i != interlocutor_timestamps.end()) {
+	while (i != server_data.get<0>().end()) {
 		if (current_timestamp - i->second >= MAXIMAL_INTERLOCUTOR_TIMEOUT) {
-			interlocutor_timestamps.erase(i++);
+			server_data.get<0>().erase(i++);
 		} else {
 			++i;
 		}
@@ -120,6 +175,7 @@ void RemoveLostInterlocutors(void) {
 }
 
 void StartServer(ConnectionContext& connection_context) {
+	ServerData server_data;
 	while (true) try {
 		char message_buffer[MAXIMAL_MESSAGE_LENGTH];
 		size_t message_length = connection_context.get<1>()->receive_from(
@@ -129,10 +185,11 @@ void StartServer(ConnectionContext& connection_context) {
 
 		ProcessMessage(
 			connection_context,
+			server_data,
 			std::string(message_buffer, message_length)
 		);
 
-		RemoveLostInterlocutors();
+		RemoveLostInterlocutors(server_data);
 	} catch(const std::exception& exception) {
 		ProcessError(exception.what());
 		SendReply(
