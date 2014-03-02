@@ -10,7 +10,7 @@ Q_OBJECT
 public:
 	Client(
 		const QString& host,
-		const unsigned short port,
+		const uint port,
 		const QString& nickname
 	);
 
@@ -28,8 +28,9 @@ protected:
 private:
 	Connection connection;
 	QString nickname;
-	QDateTime last_timestamp;
+	QDateTime last_time;
 
+	QString request(const QString& message);
 	void getInterlocutors(void);
 	void getMessages(void);
 };

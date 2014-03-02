@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include <QtCore/QSettings>
 #include <QtGui/QDesktopWidget>
 #include <QtCore/QDateTime>
 
@@ -12,14 +13,17 @@ const QString MainWindow::MESSAGE_TEMPLATE =
 
 MainWindow::MainWindow(void) :
 	QMainWindow(NULL),
-	first_time_show(true)
+	first_time_show(true),
+	client(NULL)
 {
 	ui.setupUi(this);
 	ui.message_editor->installEventFilter(this);
 	ui.message_editor->setFocus();
+}
 
-	//TODO: remove this line
-	ui.interlocutors_view->addItems(QStringList() << "test1" << "test2");
+MainWindow::~MainWindow(void) {
+	client_thread.exit();
+	client_thread.wait();
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event) {
@@ -40,8 +44,37 @@ bool MainWindow::eventFilter(QObject* object, QEvent* event) {
 }
 
 void MainWindow::start(const QString& nickname) {
-	this->nickname = nickname;
 	setWindowTitle(QString("%1 - %2").arg(windowTitle()).arg(nickname));
+
+	QSettings settings(
+		QApplication::applicationDirPath() + "/settings.ini",
+		QSettings::IniFormat
+	);
+	settings.beginGroup("City Chat");
+	QString host = settings.value("host", "localhost").toString();
+	uint port = settings.value("port", 8001).toUInt();
+	settings.endGroup();
+
+	client = new Client(host, port, nickname);
+	client->moveToThread(&client_thread);
+	connect(&client_thread, SIGNAL(terminated()), client, SLOT(deleteLater()));
+	connect(
+		client,
+		SIGNAL(interlocutors(QStringList)),
+		this,
+		SLOT(setInterlocutors(QStringList))
+	);
+	qRegisterMetaType<Message::Group>("Message::Group");
+	connect(
+		client,
+		SIGNAL(messages(Message::Group)),
+		this,
+		SLOT(addMessages(Message::Group))
+	);
+	connect(this, SIGNAL(message(QString)), client, SLOT(sendMessage(QString)));
+	connect(client, SIGNAL(error(QString)), this, SLOT(showError(QString)));
+	client_thread.start();
+
 	show();
 }
 
@@ -57,6 +90,15 @@ void MainWindow::addMessages(const Message::Group& messages) {
 	foreach (const Message& message, messages) {
 		addMessage(message);
 	}
+}
+
+void MainWindow::showError(const QString& message) {
+	addMessage(
+		Message(
+			"system",
+			QDateTime::currentDateTime(),
+			QString("<span style = \"color: red;\">%1</span>").arg(message))
+	);
 }
 
 void MainWindow::showEvent(QShowEvent* event) {
@@ -85,7 +127,7 @@ void MainWindow::addMessage(const Message& message) {
 	ui.chat_view->append(
 		MESSAGE_TEMPLATE
 			.arg(message.nickname)
-			.arg(message.date.toString("dd.mm.yyyy hh:mm:ss"))
+			.arg(message.time.toString("dd.mm.yyyy hh:mm:ss"))
 			.arg(text)
 	);
 }
@@ -106,8 +148,6 @@ void MainWindow::on_send_button_clicked(void) {
 		ui.message_editor->clear();
 		ui.message_editor->setFocus();
 
-		emit message(Message(nickname, QDateTime::currentDateTime(), text));
-		//TODO: remove this line
-		addMessage(Message(nickname, QDateTime::currentDateTime(), text));
+		emit message(text);
 	}
 }

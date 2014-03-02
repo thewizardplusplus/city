@@ -2,10 +2,10 @@
 
 Message::Message(
 	const QString& nickname,
-	const QDateTime& date,
+	const QDateTime& time,
 	const QString& text
 ) :
 	nickname(nickname),
-	date(date),
+	time(time),
 	text(text)
 {}

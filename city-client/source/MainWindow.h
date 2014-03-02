@@ -2,22 +2,26 @@
 #define MAINWINDOW_H
 
 #include "Message.h"
+#include "Client.h"
 #include "ui_MainWindow.h"
+#include <QtCore/QThread>
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
 	MainWindow(void);
+	virtual ~MainWindow(void);
 	virtual bool eventFilter(QObject* object, QEvent* event);
 
 signals:
-	void message(const Message& message);
+	void message(const QString& message);
 
 public slots:
 	void start(const QString& nickname);
 	void setInterlocutors(const QStringList& interlocutors);
 	void addMessages(const Message::Group& messages);
+	void showError(const QString& message);
 
 protected:
 	virtual void showEvent(QShowEvent* event);
@@ -27,7 +31,8 @@ private:
 
 	Ui::MainWindow ui;
 	bool first_time_show;
-	QString nickname;
+	Client* client;
+	QThread client_thread;
 
 	void addMessage(const Message& message);
 

@@ -10,12 +10,12 @@ public:
 	typedef QList<Message> Group;
 
 	QString nickname;
-	QDateTime date;
+	QDateTime time;
 	QString text;
 
 	Message(
 		const QString& nickname,
-		const QDateTime& date,
+		const QDateTime& time,
 		const QString& text
 	);
 };

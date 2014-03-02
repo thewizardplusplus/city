@@ -5,10 +5,7 @@ using namespace boost;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-Connection::Connection(
-	const QString& host,
-	const unsigned short port
-) :
+Connection::Connection(const QString& host, const uint port) :
 	socket(io_service, udp::endpoint(udp::v4(), LOCAL_PORT))
 {
 	receiver_endpoint = resolve(host, port);
@@ -32,7 +29,7 @@ QString Connection::receive(void) {
 
 udp::endpoint Connection::resolve(
 	const QString& host,
-	const unsigned short port
+	const uint port
 ) {
 	udp::resolver resolver(io_service);
 	udp::resolver::query query(

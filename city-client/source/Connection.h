@@ -6,7 +6,7 @@
 
 class Connection {
 public:
-	Connection(const QString& host, const unsigned short port);
+	Connection(const QString& host, const uint port);
 	void send(const QString& message);
 	QString receive(void);
 
@@ -20,7 +20,7 @@ private:
 
 	boost::asio::ip::udp::endpoint resolve(
 		const QString& host,
-		const unsigned short port
+		const uint port
 	);
 };
 #endif
