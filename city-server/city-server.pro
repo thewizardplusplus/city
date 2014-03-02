@@ -7,7 +7,7 @@ CONFIG -= qt
 SOURCES += source/main.cpp
 
 # внешние библиотеки
-LIBS += -lboost_program_options -lboost_regex -lboost_system -lpthread
+LIBS += -lboost_system -lboost_program_options -lboost_regex -lpthread
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2

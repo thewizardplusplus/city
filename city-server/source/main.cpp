@@ -23,7 +23,7 @@ typedef tuple<std::string, std::string> Message;
 typedef std::map<time_t, Message> MessageGroup;
 typedef tuple<InterlocutorTimestampGroup, MessageGroup> ServerData;
 
-static const char MESSAGE_PARTS_SEPARATOR = ';';
+static const char MESSAGE_PARTS_GLOBAL_SEPARATOR = ';';
 static const regex TIMESTAMP_PATTERN("^[1-9]\\d*$");
 static const char MESSAGE_PARTS_INNER_SEPARATOR = ':';
 static const time_t MAXIMAL_INTERLOCUTOR_TIMEOUT = 12;
@@ -36,7 +36,8 @@ std::string ConvertCharToString(char symbol) {
 void ProcessError(const std::string& message) {
 	std::cerr
 		<< format("City client error: %s.\n")
-			% to_lower_copy(message);
+			% to_lower_copy(message)
+		<< std::flush;
 }
 
 unsigned short ParseCommandLineArguments(
@@ -85,6 +86,16 @@ void AddOrUpdateInterlocutor(
 	server_data.get<0>()[nickname] = std::time(NULL);
 }
 
+std::string FormatMessage(time_t timestamp, const Message& message) {
+	return
+		(format("%s%c%u%c%s")
+			% message.get<0>()
+			% MESSAGE_PARTS_INNER_SEPARATOR
+			% timestamp
+			% MESSAGE_PARTS_INNER_SEPARATOR
+			% message.get<1>()).str();
+}
+
 void ProcessMessage(
 	const ConnectionContext& connection_context,
 	ServerData& server_data,
@@ -94,7 +105,7 @@ void ProcessMessage(
 	split(
 		message_parts,
 		message,
-		is_any_of(ConvertCharToString(MESSAGE_PARTS_SEPARATOR)),
+		is_any_of(ConvertCharToString(MESSAGE_PARTS_GLOBAL_SEPARATOR)),
 		token_compress_on
 	);
 	if (message_parts.empty() || message_parts[0].empty()) {
@@ -112,7 +123,7 @@ void ProcessMessage(
 			connection_context,
 			join(
 				server_data.get<0>() | map_keys,
-				ConvertCharToString(MESSAGE_PARTS_SEPARATOR)
+				ConvertCharToString(MESSAGE_PARTS_GLOBAL_SEPARATOR)
 			)
 		);
 	} else if (command == "message") {
@@ -121,10 +132,12 @@ void ProcessMessage(
 		}
 
 		AddOrUpdateInterlocutor(server_data, nickname);
-		server_data.get<1>()[std::time(NULL)] = Message(
-			nickname,
-			message_parts[2]
-		);
+
+		time_t timestamp = std::time(NULL);
+		Message message(nickname, message_parts[2]);
+		server_data.get<1>()[timestamp] = message;
+		std::cout << FormatMessage(timestamp, message) << '\n' << std::flush;
+
 		SendReply(connection_context, "ok");
 	} else if (command == "history") {
 		if (message_parts.size() < 3 || message_parts[2].empty()) {
@@ -144,13 +157,9 @@ void ProcessMessage(
 		);
 		for (; i != server_data.get<1>().end(); ++i) {
 			reply +=
-				(format("%s%c%u%c%s%c")
-					% i->second.get<0>()
-					% MESSAGE_PARTS_INNER_SEPARATOR
-					% i->first
-					% MESSAGE_PARTS_INNER_SEPARATOR
-					% i->second.get<1>()
-					% MESSAGE_PARTS_SEPARATOR).str();
+				(format("%s%c")
+					% FormatMessage(i->first, i->second)
+					% MESSAGE_PARTS_GLOBAL_SEPARATOR).str();
 		}
 		if (!reply.empty()) {
 			reply = reply.substr(0, reply.length() - 1);
@@ -195,7 +204,7 @@ void StartServer(ConnectionContext& connection_context) {
 		SendReply(
 			connection_context,
 			(format("error%c%s")
-				% MESSAGE_PARTS_SEPARATOR
+				% MESSAGE_PARTS_GLOBAL_SEPARATOR
 				% exception.what()).str()
 		);
 	}
