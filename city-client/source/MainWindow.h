@@ -33,6 +33,7 @@ private:
 	bool first_time_show;
 	Client* client;
 	QThread client_thread;
+	QSet<QString> interlocutors;
 
 	void addMessage(const Message& message);
 

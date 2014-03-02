@@ -84,6 +84,34 @@ void MainWindow::setInterlocutors(const QStringList& interlocutors) {
 	}
 
 	ui.interlocutors_view->addItems(interlocutors);
+
+	QSet<QString> current_interlocutors = interlocutors.toSet();
+	QSet<QString> lost_interlocutors =
+		this->interlocutors - current_interlocutors;
+	foreach (const QString& interlocutor, lost_interlocutors) {
+		addMessage(
+			Message(
+				"system",
+				QDateTime::currentDateTime(),
+				trUtf8("<span style = \"color: #888;\">чат покидает %1.</span>")
+					.arg(interlocutor)
+			)
+		);
+	}
+	QSet<QString> new_interlocutors =
+		current_interlocutors - this->interlocutors;
+	foreach (const QString& interlocutor, new_interlocutors) {
+		addMessage(
+			Message(
+				"system",
+				QDateTime::currentDateTime(),
+				trUtf8(
+					"<span style = \"color: green;\">в чат входит %1.</span>"
+				).arg(interlocutor)
+			)
+		);
+	}
+	this->interlocutors = current_interlocutors;
 }
 
 void MainWindow::addMessages(const Message::Group& messages) {
@@ -97,7 +125,7 @@ void MainWindow::showError(const QString& message) {
 		Message(
 			"system",
 			QDateTime::currentDateTime(),
-			QString("<span style = \"color: red;\">%1</span>").arg(message))
+			QString("<span style = \"color: red;\">%1.</span>").arg(message))
 	);
 }
 
@@ -127,7 +155,7 @@ void MainWindow::addMessage(const Message& message) {
 	ui.chat_view->append(
 		MESSAGE_TEMPLATE
 			.arg(message.nickname)
-			.arg(message.time.toString("dd.mm.yyyy hh:mm:ss"))
+			.arg(message.time.toString("dd.MM.yyyy hh:mm:ss"))
 			.arg(text)
 	);
 }
