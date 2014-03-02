@@ -6,12 +6,14 @@ HEADERS += \
 	source/StartWindow.h \
 	source/Message.h \
 	source/MainWindow.h \
-	source/Connection.h
+	source/Connection.h \
+	source/Client.h
 SOURCES += \
 	source/StartWindow.cpp \
 	source/Message.cpp \
 	source/MainWindow.cpp \
 	source/Connection.cpp \
+	source/Client.cpp \
 	source/main.cpp
 FORMS += \
 	source/StartWindow.ui \
