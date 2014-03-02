@@ -23,7 +23,7 @@ MainWindow::MainWindow(void) :
 
 MainWindow::~MainWindow(void) {
 	client_thread.exit();
-	client_thread.wait();
+	client_thread.wait(1000);
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event) {
