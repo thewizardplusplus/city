@@ -1,10 +1,15 @@
 #include "StartWindow.h"
-#include <QtGui/QDesktopWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QDesktopWidget>
+#else
+	#include <QtGui/QDesktopWidget>
+#endif
 
 StartWindow::StartWindow(void) :
 	QDialog(NULL),
 	first_time_show(true)
 {
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	ui.setupUi(this);
 }
 

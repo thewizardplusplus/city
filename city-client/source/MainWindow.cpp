@@ -1,6 +1,10 @@
 #include "MainWindow.h"
 #include <QtCore/QSettings>
-#include <QtGui/QDesktopWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QDesktopWidget>
+#else
+	#include <QtGui/QDesktopWidget>
+#endif
 #include <QtCore/QDateTime>
 
 const QString MainWindow::MESSAGE_TEMPLATE =
@@ -57,7 +61,21 @@ void MainWindow::start(const QString& nickname) {
 
 	client = new Client(host, port, nickname);
 	client->moveToThread(&client_thread);
-	connect(&client_thread, SIGNAL(terminated()), client, SLOT(deleteLater()));
+	#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+		connect(
+			&client_thread,
+			SIGNAL(finished()),
+			client,
+			SLOT(deleteLater())
+		);
+	#else
+		connect(
+			&client_thread,
+			SIGNAL(terminated()),
+			client,
+			SLOT(deleteLater())
+		);
+	#endif
 	connect(
 		client,
 		SIGNAL(interlocutors(QStringList)),

@@ -1,6 +1,10 @@
 #include "StartWindow.h"
 #include "MainWindow.h"
-#include <QtGui/QApplication>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QApplication>
+#else
+	#include <QtGui/QApplication>
+#endif
 #include <QtCore/QTranslator>
 #include <QtCore/QLibraryInfo>
 

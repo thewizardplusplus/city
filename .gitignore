@@ -1,4 +1,5 @@
 *~
 *.pro.user
 city-client-build*/
+build-city-client*/
 city-server-build*/
