@@ -9,6 +9,14 @@
 #include <QtCore/QLibraryInfo>
 
 int main(int arguments_number, char* arguments[]) {
+	QCoreApplication::setLibraryPaths(
+		QCoreApplication::libraryPaths()
+			<< "."
+			<< "platforms"
+			<< "imageformats"
+			<< "iconengines"
+	);
+
 	QApplication application(arguments_number, arguments);
 
 	QTranslator translator;
