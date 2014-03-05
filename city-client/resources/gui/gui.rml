@@ -1,0 +1,12 @@
+<rml>
+	<head>
+		<link type = "text/rcss" href = "gui.rcss" />
+	</head>
+	<body class = "demo">
+		<div class = "window">
+			<h1>Moon</h1>
+			<button onclick = "switch-animation">Stop animation</button>
+			<button onclick = "exit">Exit</button>
+		</div>
+	</body>
+</rml>
