@@ -5,24 +5,21 @@ CONFIG -= qt
 
 # файлы проекта
 HEADERS += \
-	source/RenderInterfaceSFML.h \
-	source/SystemInterfaceSFML.h \
-	source/ShellFileInterface.h \
-	source/EventListener.h \
-	source/EventListenerFactory.h \
-	source/DemoContext.h
+	source/TextureFactory.h \
+	source/Sprite.h \
+	source/FontFactory.h \
+	source/Label.h \
+	source/LabelStyle.h
 SOURCES += \
-	source/RenderInterfaceSFML.cpp \
-	source/SystemInterfaceSFML.cpp \
-	source/ShellFileInterface.cpp \
-	source/EventListener.cpp \
-	source/EventListenerFactory.cpp \
-	source/DemoContext.cpp \
+	source/TextureFactory.cpp \
+	source/Sprite.cpp \
+	source/FontFactory.cpp \
+	source/Label.cpp \
+	source/LabelStyle.cpp \
 	source/main.cpp
 
 # внешние библиотеки
-LIBS += -L/usr/local/lib
-LIBS += -lsfml-system -lsfml-window -lsfml-graphics -lRocketCore -lRocketDebugger
+LIBS += -lsfml-system -lsfml-window -lsfml-graphics
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
