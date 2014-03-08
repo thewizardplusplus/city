@@ -9,13 +9,17 @@ HEADERS += \
 	source/Sprite.h \
 	source/FontFactory.h \
 	source/Label.h \
-	source/LabelStyle.h
+	source/LabelStyle.h \
+	source/Entity.h \
+	source/ParameterizedEntity.h
 SOURCES += \
 	source/TextureFactory.cpp \
 	source/Sprite.cpp \
 	source/FontFactory.cpp \
 	source/Label.cpp \
 	source/LabelStyle.cpp \
+	source/Entity.cpp \
+	source/ParameterizedEntity.cpp \
 	source/main.cpp
 
 # внешние библиотеки

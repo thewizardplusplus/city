@@ -15,7 +15,7 @@ int main(void) {
 
 	Label label(
 		LabelStyle(
-			FontFactory::getInstance().loadFont("braxton_font.otf"),
+			FontFactory::getInstance().loadFont("font.otf"),
 			sf::Color::White,
 			50
 		)
