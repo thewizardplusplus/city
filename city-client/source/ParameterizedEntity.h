@@ -6,6 +6,8 @@
 
 class ParameterizedEntity : public Entity {
 public:
+	using Entity::setPosition;
+
 	static const float PARAMETER_LABEL_SHIFT;
 	static const LabelStyle PARAMETER_LABEL_STYLE;
 
@@ -15,7 +17,7 @@ public:
 	virtual void setPosition(const sf::Vector2f& position);
 	virtual void render(sf::RenderWindow& render);
 
-private:
+protected:
 	Label label;
 
 	void updateParameterPosition(void);

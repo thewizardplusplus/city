@@ -1,10 +1,12 @@
 #include "Entity.h"
 
-const float Entity::SIZE = 10.0;
+const float Entity::SIZE = 50.0;
 
 Entity::Entity(const std::string& sprite_filename) :
 	sprite(sprite_filename)
-{}
+{
+	sprite.setSize(SIZE, SIZE);
+}
 
 Entity::~Entity(void) {}
 

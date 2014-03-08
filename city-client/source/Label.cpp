@@ -3,7 +3,11 @@
 Label::Label(const LabelStyle& style) :
 	style(style)
 {
-	text.SetFont(*style.font);
+	if (style.font) {
+		text.SetFont(*style.font);
+	} else {
+		text.SetFont(sf::Font::GetDefaultFont());
+	}
 	text.SetColor(style.color);
 	text.SetSize(style.size);
 }

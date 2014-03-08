@@ -2,9 +2,12 @@
 #define ENTITY_H
 
 #include "Sprite.h"
+#include <boost/shared_ptr.hpp>
 
 class Entity {
 public:
+	typedef boost::shared_ptr<Entity> Pointer;
+
 	static const float SIZE;
 
 	Entity(const std::string& sprite_filename);

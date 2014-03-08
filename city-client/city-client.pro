@@ -11,7 +11,8 @@ HEADERS += \
 	source/Label.h \
 	source/LabelStyle.h \
 	source/Entity.h \
-	source/ParameterizedEntity.h
+	source/ParameterizedEntity.h \
+	source/VariableEntity.h
 SOURCES += \
 	source/TextureFactory.cpp \
 	source/Sprite.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 	source/LabelStyle.cpp \
 	source/Entity.cpp \
 	source/ParameterizedEntity.cpp \
+	source/VariableEntity.cpp \
 	source/main.cpp
 
 # внешние библиотеки

@@ -1,10 +1,10 @@
 #include "ParameterizedEntity.h"
 
-const float ParameterizedEntity::PARAMETER_LABEL_SHIFT = 10;
+const float ParameterizedEntity::PARAMETER_LABEL_SHIFT = Entity::SIZE / 4.0f;
 const LabelStyle ParameterizedEntity::PARAMETER_LABEL_STYLE(
-	FontFactory::getInstance().loadFont("font.otf"),
+	Font(),
 	sf::Color::Red,
-	2.5f
+	Entity::SIZE / 4.0f
 );
 
 ParameterizedEntity::ParameterizedEntity(const std::string& sprite_filename) :
@@ -34,6 +34,6 @@ void ParameterizedEntity::render(sf::RenderWindow& render) {
 
 void ParameterizedEntity::updateParameterPosition(void) {
 	label.setPosition(
-		sprite.getPosition() + sf::Vector2f(0.0f, PARAMETER_LABEL_SHIFT)
+		sprite.getPosition() - sf::Vector2f(0.0f, PARAMETER_LABEL_SHIFT)
 	);
 }
