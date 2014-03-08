@@ -1,8 +1,9 @@
 #include "VariableEntity.h"
 #include <boost/lexical_cast.hpp>
-#include <cmath>
+#include <boost/format.hpp>
+#include <iostream>
 
-int main(void) {
+int main(void) try {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Simple 2D game");
 
 	Entity entity1("red_castle.png");
@@ -30,7 +31,7 @@ int main(void) {
 			}
 		}
 
-		window.Clear();
+		window.Clear(sf::Color(0x22, 0x8b, 0x22));
 
 		entity1.render(window);
 		entity2.setParameter(boost::lexical_cast<std::string>(tick));
@@ -44,4 +45,6 @@ int main(void) {
 		tick++;
 		tick %= 100;
 	}
+} catch (const std::exception& exception) {
+	std::cerr << (boost::format("Error! %s\n") % exception.what()).str();
 }
