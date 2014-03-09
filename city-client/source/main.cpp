@@ -1,49 +1,30 @@
-#include "VariableEntity.h"
-#include <boost/lexical_cast.hpp>
+#include "Level.h"
 #include <boost/format.hpp>
 #include <iostream>
 
 int main(void) try {
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Simple 2D game");
+	sf::RenderWindow window(
+		sf::VideoMode(Entity::SIZE * 12, Entity::SIZE * 8),
+		"Simple 2D game"
+	);
 
-	Entity entity1(0, "red_castle.png");
-	entity1.setPosition(0, 0);
-	ParameterizedEntity entity2(0, "red_castle.png");
-	entity2.setPosition(0, 1);
-	StringGroup filenames;
-	filenames.push_back("red_castle.png");
-	filenames.push_back("green_castle.png");
-	filenames.push_back("grey_castle.png");
-	VariableEntity entity3(0, filenames);
-	entity3.setPosition(1, 0);
-
-	size_t tick = 0;
+	Level level("");
+	level.setPosition(sf::Vector2i(-2, -2));
 	while (window.IsOpened()) {
 		sf::Event event;
-		while (true) {
-			bool event_got = window.GetEvent(event);
-			if (!event_got) {
-				break;
-			}
-
-			if (event.Type == sf::Event::Closed) {
-				window.Close();
+		while (window.GetEvent(event)) {
+			switch (event.Type) {
+				case sf::Event::Closed:
+					window.Close();
+					break;
+				default:
+					break;
 			}
 		}
 
-		window.Clear(sf::Color(0x22, 0x8b, 0x22));
-
-		entity1.render(window);
-		entity2.setParameter(boost::lexical_cast<std::string>(tick));
-		entity2.render(window);
-		entity3.setParameter(boost::lexical_cast<std::string>(tick));
-		entity3.setState(tick % 3);
-		entity3.render(window);
-
+		window.Clear();
+		level.render(window);
 		window.Display();
-
-		tick++;
-		tick %= 100;
 	}
 } catch (const std::exception& exception) {
 	std::cerr << (boost::format("Error! %s\n") % exception.what()).str();
