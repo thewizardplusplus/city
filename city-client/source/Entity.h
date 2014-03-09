@@ -10,14 +10,19 @@ public:
 
 	static const float SIZE;
 
-	Entity(const std::string& sprite_filename);
+	Entity(size_t id, const std::string& sprite_filename);
 	virtual ~Entity(void);
-	sf::Vector2f getPosition(void) const;
-	void setPosition(float x, float y);
-	virtual void setPosition(const sf::Vector2f& position);
+	size_t getId(void) const;
+	sf::Vector2i getPosition(void) const;
+	void setPosition(int x, int y);
+	virtual void setPosition(const sf::Vector2i& position);
 	virtual void render(sf::RenderWindow& render);
 
 protected:
+	size_t id;
+	sf::Vector2i position;
 	Sprite sprite;
+
+	void updateSpritePosition(void);
 };
 #endif

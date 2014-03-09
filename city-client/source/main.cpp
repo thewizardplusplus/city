@@ -6,16 +6,16 @@
 int main(void) try {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Simple 2D game");
 
-	Entity entity1("red_castle.png");
-	entity1.setPosition(100, 100);
-	ParameterizedEntity entity2("red_castle.png");
-	entity2.setPosition(100, 200);
+	Entity entity1(0, "red_castle.png");
+	entity1.setPosition(0, 0);
+	ParameterizedEntity entity2(0, "red_castle.png");
+	entity2.setPosition(0, 1);
 	StringGroup filenames;
 	filenames.push_back("red_castle.png");
 	filenames.push_back("green_castle.png");
 	filenames.push_back("grey_castle.png");
-	VariableEntity entity3(filenames);
-	entity3.setPosition(100, 300);
+	VariableEntity entity3(0, filenames);
+	entity3.setPosition(1, 0);
 
 	size_t tick = 0;
 	while (window.IsOpened()) {

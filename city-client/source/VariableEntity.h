@@ -9,12 +9,14 @@ typedef std::vector<Sprite> SpriteGroup;
 
 class VariableEntity : public ParameterizedEntity {
 public:
-	using Entity::setPosition;
+	typedef boost::shared_ptr<VariableEntity> Pointer;
 
-	VariableEntity(const StringGroup& sprites_filenames);
+	using ParameterizedEntity::setPosition;
+
+	VariableEntity(size_t id, const StringGroup& sprites_filenames);
 	size_t getState(void) const;
 	void setState(size_t state);
-	virtual void setPosition(const sf::Vector2f& position);
+	virtual void setPosition(const sf::Vector2i& position);
 	virtual void render(sf::RenderWindow& render);
 
 private:

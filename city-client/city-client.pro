@@ -12,7 +12,8 @@ HEADERS += \
 	source/LabelStyle.h \
 	source/Entity.h \
 	source/ParameterizedEntity.h \
-	source/VariableEntity.h
+	source/VariableEntity.h \
+    source/Level.h
 SOURCES += \
 	source/TextureFactory.cpp \
 	source/Sprite.cpp \
@@ -22,7 +23,8 @@ SOURCES += \
 	source/Entity.cpp \
 	source/ParameterizedEntity.cpp \
 	source/VariableEntity.cpp \
-	source/main.cpp
+	source/main.cpp \
+    source/Level.cpp
 
 # внешние библиотеки
 LIBS += -lsfml-system -lsfml-window -lsfml-graphics
