@@ -1,23 +1,68 @@
 #include "Level.h"
+#include "VariableEntity.h"
+#include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
+#include <fstream>
+#include <iostream>
 
+const boost::regex Level::LEVEL_FILE_LINE_PATTERN(
+	"(0|[1-9]\\d*) (tree|mountain|castle) (0|[1-9]\\d*) (0|[1-9]\\d*)"
+);
 const sf::Color Level::BACKGROUND_COLOR(0x22, 0x8b, 0x22);
 const float Level::GRID_THICKNESS = 2.0f;
 const sf::Color Level::GRID_COLOR(128, 128, 128);
 
 Level::Level(const std::string& filename) {
-	(void)filename;
+	StringGroup sprites_filenames;
+	sprites_filenames.push_back("grey_castle.png");
+	sprites_filenames.push_back("red_castle.png");
+	sprites_filenames.push_back("green_castle.png");
 
-	Entity::Pointer entity1(new Entity(0, "red_castle.png"));
-	entity1->setPosition(0, 0);
-	entities.push_back(entity1);
+	std::ifstream in(filename.c_str());
+	while (in) {
+		std::string line;
+		std::getline(in, line);
+		if (line.empty()) {
+			continue;
+		}
 
-	Entity::Pointer entity2(new Entity(0, "red_castle.png"));
-	entity2->setPosition(0, 1);
-	entities.push_back(entity2);
+		boost::smatch matches;
+		if (boost::regex_match(line, matches, LEVEL_FILE_LINE_PATTERN)) {
+			Entity::Pointer entity;
+			std::string entity_type = matches[2];
+			size_t id = boost::lexical_cast<size_t>(matches[1]);
+			if (entity_type == "tree") {
+				entity.reset(new Entity(id, "tree.png"));
+			} else if (entity_type == "mountain") {
+				entity.reset(new Entity(id, "mountain.png"));
+			} else if (entity_type == "castle") {
+				VariableEntity::Pointer castle_entity(new VariableEntity(
+					id,
+					sprites_filenames
+				));
+				castle_entity->setParameter("1");
 
-	Entity::Pointer entity3(new Entity(0, "red_castle.png"));
-	entity3->setPosition(1, 0);
-	entities.push_back(entity3);
+				entity = castle_entity;
+			} else {
+				std::cerr
+					<< (boost::format(
+						"Warning! Invalid entity type \"%s\" in level file.\n"
+					) % entity_type).str();
+				continue;
+			}
+
+			entity->setPosition(
+				boost::lexical_cast<size_t>(matches[3]),
+				boost::lexical_cast<size_t>(matches[4])
+			);
+			entities.push_back(entity);
+		} else {
+			std::cerr
+				<< (boost::format(
+					"Warning! Invalid line \"%s\" in level file.\n"
+				) % line).str();
+		}
+	}
 }
 
 sf::Vector2i Level::getPosition(void) const {

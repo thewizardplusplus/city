@@ -2,12 +2,14 @@
 #define LEVEL_H
 
 #include "Entity.h"
+#include <boost/regex.hpp>
 #include <vector>
 
 typedef std::vector<Entity::Pointer> EntityGroup;
 
 class Level {
 public:
+	static const boost::regex LEVEL_FILE_LINE_PATTERN;
 	static const sf::Color BACKGROUND_COLOR;
 	static const float GRID_THICKNESS;
 	static const sf::Color GRID_COLOR;

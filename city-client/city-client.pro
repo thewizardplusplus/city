@@ -27,7 +27,7 @@ SOURCES += \
 	source/main.cpp
 
 # внешние библиотеки
-LIBS += -lsfml-system -lsfml-window -lsfml-graphics
+LIBS += -lsfml-system -lsfml-window -lsfml-graphics -lboost_regex
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
