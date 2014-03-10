@@ -40,7 +40,7 @@ Level::Level(const std::string& filename) {
 					id,
 					sprites_filenames
 				));
-				castle_entity->setParameter("1");
+				castle_entity->setParameter("0");
 
 				entity = castle_entity;
 			} else {
