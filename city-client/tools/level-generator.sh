@@ -5,13 +5,6 @@ readonly LEVEL_HEIGHT=$2
 readonly MAXIMAL_ENTITIES_NUMBER=$3
 readonly ENTITIES=(tree mountain castle)
 
-id=0
-
-function GetId {
-	echo $id
-	id=$((id + 1))
-}
-
 function GetEntityType {
 	echo ${ENTITIES[$((RANDOM % ${#ENTITIES[*]}))]}
 }
@@ -26,7 +19,7 @@ function GenerateEntity {
 	local -r position_x=$2
 	local -r position_y=$3
 
-	echo "$(GetId) $type $position_x $position_y"
+	echo "$type $position_x $position_y"
 }
 
 function GenerateHorizontalWall {
@@ -63,4 +56,12 @@ function GenerateLevel {
 	done
 }
 
-GenerateLevel | rev | sort | rev | uniq -f 2 > $4
+function FilterEntityOnSamePosition {
+	cat | rev | sort | rev | uniq -f 2
+}
+
+function AddLineNumbers {
+	cat | nl -s " " -v 0 -w 1
+}
+
+GenerateLevel | FilterEntityOnSamePosition | AddLineNumbers > $4
