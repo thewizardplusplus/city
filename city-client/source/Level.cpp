@@ -43,6 +43,7 @@ Level::Level(const std::string& filename) {
 				castle_entity->setParameter("0");
 
 				entity = castle_entity;
+				castles[id] = castle_entity;
 			} else {
 				std::cerr
 					<< (boost::format(
@@ -75,6 +76,59 @@ void Level::setPosition(int x, int y) {
 
 void Level::setPosition(const sf::Vector2i& position) {
 	this->position = position;
+}
+
+void Level::setEntityParameter(size_t id, const std::string& parameter) {
+	if (castles.count(id)) {
+		castles[id]->setParameter(parameter);
+	} else if (players.count(id)) {
+		players[id]->setParameter(parameter);
+	} else {
+		std::cerr
+			<< (boost::format("Warning! Invalid entity id \"%u\".\n") % id)
+				.str();
+	}
+}
+
+void Level::setEntityState(size_t id, size_t state) {
+	if (castles.count(id)) {
+		castles[id]->setState(state);
+	} else if (players.count(id)) {
+		players[id]->setState(state);
+	} else {
+		std::cerr
+			<< (boost::format("Warning! Invalid entity id \"%u\".\n") % id)
+				.str();
+	}
+}
+
+void Level::addPlayer(size_t id) {
+	StringGroup sprites_filenames;
+	sprites_filenames.push_back("green_player.png");
+	sprites_filenames.push_back("red_player.png");
+
+	VariableEntity::Pointer player_entity(new VariableEntity(
+		id,
+		sprites_filenames
+	));
+	player_entity->setParameter("25");
+
+	entities.push_back(player_entity);
+	players[id] = player_entity;
+}
+
+void Level::removePlayer(size_t id) {
+	players.erase(id);
+}
+
+void Level::setPlayerPosition(size_t id, const sf::Vector2i& position) {
+	if (players.count(id)) {
+		players[id]->setPosition(position);
+	} else {
+		std::cerr
+			<< (boost::format("Warning! Invalid player id \"%u\".\n") % id)
+				.str();
+	}
 }
 
 void Level::render(sf::RenderWindow& render) {
