@@ -75,7 +75,9 @@ Level::Level(const std::string& filename) :
 	}
 }
 
-Level::operator std::string(void) const {
+Level::operator std::string(void) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	std::string result;
 	std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
 	for (; i != players.end(); ++i) {
@@ -91,6 +93,8 @@ Level::operator std::string(void) const {
 }
 
 size_t Level::addPlayer(void) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	if (not_held_positions.empty()) {
 		throw std::runtime_error("not held positions");
 	}
@@ -106,6 +110,8 @@ size_t Level::addPlayer(void) {
 }
 
 bool Level::movePlayer(size_t player_id, Direction direction) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	if (!players.count(player_id)) {
 		throw std::runtime_error("invalid player id");
 	}
@@ -135,6 +141,8 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 }
 
 void Level::updatePlayerTimestamp(size_t player_id) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	if (!players.count(player_id)) {
 		throw std::runtime_error("invalid player id");
 	}
@@ -143,6 +151,8 @@ void Level::updatePlayerTimestamp(size_t player_id) {
 }
 
 void Level::removeLostPlayers(void) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	std::map<size_t, PlayerSmartPointer>::iterator i = players.begin();
 	time_t current_timestamp = std::time(NULL);
 	while (i != players.end()) {

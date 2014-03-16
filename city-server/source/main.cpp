@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
+#include <boost/thread/thread.hpp>
 #include <iostream>
 
 using namespace boost;
@@ -70,11 +71,14 @@ void ProcessMessage(
 		is_any_of(ConvertCharToString(MESSAGE_PARTS_SEPARATOR))
 	);
 
+	size_t player_id = lexical_cast<size_t>(message_parts[1]);
+	level->updatePlayerTimestamp(player_id);
+
 	if (starts_with(message, "w")) {
 		connection->send(*level);
 	} else if (starts_with(message, "m")) {
 		bool moved = level->movePlayer(
-			lexical_cast<size_t>(message_parts[1]),
+			player_id,
 			static_cast<Direction>(lexical_cast<int>(message_parts[2]))
 		);
 		connection->send(moved ? "true" : "false");
@@ -98,6 +102,19 @@ void StartServer(
 	}
 }
 
+void CleanerThreadFunction(const LevelSmartPointer& level) {
+	while (true) {
+		level->removeLostPlayers();
+
+		boost::posix_time::seconds delay(Level::MAXIMAL_PLAYER_TIMEOUT);
+		this_thread::sleep(delay);
+	}
+}
+
+void StartCleanerThread(const LevelSmartPointer& level) {
+	new thread(CleanerThreadFunction, level);
+}
+
 int main(int arguments_number, char* arguments[]) try {
 	unsigned short port = ParseCommandLineArguments(
 		arguments_number,
@@ -105,6 +122,7 @@ int main(int arguments_number, char* arguments[]) try {
 	);
 	ConnectionSmartPointer connection(new Connection(port));
 	LevelSmartPointer level(new Level("level.lvl"));
+	StartCleanerThread(level);
 	StartServer(connection, level);
 } catch(const std::exception& exception) {
 	ProcessError(exception.what());

@@ -3,6 +3,7 @@
 
 #include "Player.h"
 #include <boost/regex.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
 #include <vector>
@@ -17,8 +18,10 @@ enum Direction {
 
 class Level {
 public:
+	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
+
 	Level(const std::string& filename);
-	operator std::string(void) const;
+	operator std::string(void);
 	size_t addPlayer(void);
 	bool movePlayer(size_t player_id, Direction direction);
 	void updatePlayerTimestamp(size_t player_id);
@@ -26,12 +29,12 @@ public:
 
 private:
 	static const boost::regex LEVEL_FILE_LINE_PATTERN;
-	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
 
 	std::list<Position> held_positions;
 	std::vector<Position> not_held_positions;
 	size_t last_player_id;
 	std::map<size_t, PlayerSmartPointer> players;
+	boost::mutex mutex;
 
 	bool isPositionHeld(const Position& position) const;
 };

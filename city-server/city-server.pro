@@ -17,7 +17,7 @@ SOURCES += \
     source/Level.cpp
 
 # внешние библиотеки
-LIBS += -lboost_system -lboost_program_options -lboost_regex -lpthread
+LIBS += -lboost_system -lboost_program_options -lboost_regex -lboost_thread -lpthread
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
