@@ -5,10 +5,16 @@ CONFIG -= qt
 
 # файлы проекта
 HEADERS += \
-	source/Connection.h
+	source/Connection.h \
+    source/Position.h \
+    source/Player.h \
+    source/Level.h
 SOURCES += \
 	source/Connection.cpp \
-	source/main.cpp
+	source/main.cpp \
+    source/Position.cpp \
+    source/Player.cpp \
+    source/Level.cpp
 
 # внешние библиотеки
 LIBS += -lboost_system -lboost_program_options -lboost_regex -lpthread
