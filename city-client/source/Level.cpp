@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace boost;
+
 const boost::regex Level::LEVEL_FILE_LINE_PATTERN(
 	"(0|[1-9]\\d*) (tree|mountain|castle) (0|[1-9]\\d*) (0|[1-9]\\d*)"
 );
@@ -65,19 +67,9 @@ Level::Level(const std::string& filename) {
 	}
 }
 
-sf::Vector2i Level::getPosition(void) const {
-	return position;
-}
-
-void Level::setPosition(int x, int y) {
-	setPosition(sf::Vector2i(x, y));
-}
-
-void Level::setPosition(const sf::Vector2i& position) {
-	this->position = position;
-}
-
 void Level::setEntityState(size_t id, size_t state) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	if (castles.count(id)) {
 		castles[id]->setState(state);
 	} else if (players.count(id)) {
@@ -90,24 +82,23 @@ void Level::setEntityState(size_t id, size_t state) {
 }
 
 void Level::addPlayer(size_t id) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	StringGroup sprites_filenames;
 	sprites_filenames.push_back("green_player.png");
 	sprites_filenames.push_back("red_player.png");
 
-	VariableEntity::Pointer player_entity(new VariableEntity(
-		id,
-		sprites_filenames
-	));
-
-	entities.push_back(player_entity);
-	players[id] = player_entity;
-}
-
-void Level::removePlayer(size_t id) {
-	players.erase(id);
+	players[id] = VariableEntity::Pointer(
+		new VariableEntity(
+			id,
+			sprites_filenames
+		)
+	);
 }
 
 void Level::setPlayerPosition(size_t id, const sf::Vector2i& position) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	if (players.count(id)) {
 		players[id]->setPosition(position);
 	} else {
@@ -117,7 +108,14 @@ void Level::setPlayerPosition(size_t id, const sf::Vector2i& position) {
 	}
 }
 
+void Level::removeAllPlayer() {
+	lock_guard<boost::mutex> guard(mutex);
+	players.clear();
+}
+
 void Level::render(sf::RenderWindow& render) {
+	lock_guard<boost::mutex> guard(mutex);
+
 	sf::Vector2i render_size(render.GetWidth(), render.GetHeight());
 	render.Draw(
 		sf::Shape::Rectangle(
@@ -135,6 +133,14 @@ void Level::render(sf::RenderWindow& render) {
 		entity->setPosition(entity->getPosition() - position);
 		entity->render(render);
 		entity->setPosition(entity->getPosition() + position);
+	}
+
+	VariableEntityGroup::const_iterator j = players.begin();
+	for (; j != players.end(); ++i) {
+		VariableEntity::Pointer player = j->second;
+		player->setPosition(player->getPosition() - position);
+		player->render(render);
+		player->setPosition(player->getPosition() + position);
 	}
 
 	for (int y = 0; y < render_size.y; y += Entity::SIZE) {

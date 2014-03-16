@@ -4,6 +4,8 @@
 #include "Entity.h"
 #include "VariableEntity.h"
 #include <boost/regex.hpp>
+#include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
 
@@ -18,13 +20,10 @@ public:
 	static const sf::Color GRID_COLOR;
 
 	Level(const std::string& filename);
-	sf::Vector2i getPosition(void) const;
-	void setPosition(int x, int y);
-	void setPosition(const sf::Vector2i& position);
 	void setEntityState(size_t id, size_t state);
 	void addPlayer(size_t id);
-	void removePlayer(size_t id);
 	void setPlayerPosition(size_t id, const sf::Vector2i& position);
+	void removeAllPlayer(void);
 	void render(sf::RenderWindow& render);
 
 private:
@@ -32,5 +31,8 @@ private:
 	EntityGroup entities;
 	VariableEntityGroup castles;
 	VariableEntityGroup players;
+	boost::mutex mutex;
 };
+
+typedef boost::shared_ptr<Level> LevelSmartPointer;
 #endif

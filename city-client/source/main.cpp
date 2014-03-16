@@ -6,11 +6,6 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 
-std::list<size_t> castle_ids = boost::assign::list_of<size_t>
-	(6)(19)(31)(35)(44)(46)(47)(61)(70)(74)(75);
-size_t first_player_id = 77;
-size_t players_number = 12;
-
 int main(void) try {
 	sf::RenderWindow window(
 		sf::VideoMode(Entity::SIZE * 12, Entity::SIZE * 8),
@@ -19,7 +14,7 @@ int main(void) try {
 
 	ConnectionSmartPointer connection(new Connection());
 
-	Level level("level.lvl");
+	LevelSmartPointer level(new Level("level.lvl"));
 	while (window.IsOpened()) {
 		sf::Event event;
 		while (window.GetEvent(event)) {
@@ -27,7 +22,7 @@ int main(void) try {
 				case sf::Event::Closed:
 					window.Close();
 					break;
-				case sf::Event::KeyPressed:
+				/*case sf::Event::KeyPressed:
 					switch (event.Key.Code) {
 						case sf::Key::Left:
 							level.setPosition(
@@ -55,14 +50,14 @@ int main(void) try {
 						default:
 							break;
 					}
-					break;
+					break;*/
 				default:
 					break;
 			}
 		}
 
 		window.Clear();
-		level.render(window);
+		level->render(window);
 		window.Display();
 	}
 } catch (const std::exception& exception) {
