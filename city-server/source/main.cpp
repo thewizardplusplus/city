@@ -1,4 +1,5 @@
 #include "Connection.h"
+#include "Level.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
@@ -48,14 +49,17 @@ unsigned short ParseCommandLineArguments(
 
 void ProcessMessage(
 	const ConnectionSmartPointer& connection,
-	const std::string& message
+	const std::string& message,
+	const LevelSmartPointer& level
 ) {
 	if (!regex_match(message, MESSAGE_PATTERN)) {
 		throw std::runtime_error("invalid command");
 	}
 
 	if (message == "r") {
-		connection->send("registration request");
+		size_t player_id = level->addPlayer();
+		connection->send(lexical_cast<std::string>(player_id));
+
 		return;
 	}
 
@@ -67,29 +71,23 @@ void ProcessMessage(
 	);
 
 	if (starts_with(message, "w")) {
-		connection->send(
-			(format("world request, player id: #%s")
-				% message_parts[1]).str()
-		);
+		connection->send(*level);
 	} else if (starts_with(message, "m")) {
-		std::vector<std::string> directions;
-		directions.push_back("up");
-		directions.push_back("right");
-		directions.push_back("down");
-		directions.push_back("left");
-
-		connection->send(
-			(format("player move request to %s, player id: #%s")
-				% directions.at(lexical_cast<size_t>(message_parts[2]))
-				% message_parts[1]).str()
+		bool moved = level->movePlayer(
+			lexical_cast<size_t>(message_parts[1]),
+			static_cast<Direction>(lexical_cast<int>(message_parts[2]))
 		);
+		connection->send(moved ? "true" : "false");
 	}
 }
 
-void StartServer(const ConnectionSmartPointer& connection) {
+void StartServer(
+	const ConnectionSmartPointer& connection,
+	const LevelSmartPointer& level
+) {
 	while (true) try {
 		std::string message = connection->receive();
-		ProcessMessage(connection, message);
+		ProcessMessage(connection, message, level);
 	} catch(const std::exception& exception) {
 		ProcessError(exception.what());
 		connection->send(
@@ -106,7 +104,8 @@ int main(int arguments_number, char* arguments[]) try {
 		arguments
 	);
 	ConnectionSmartPointer connection(new Connection(port));
-	StartServer(connection);
+	LevelSmartPointer level(new Level("level.lvl"));
+	StartServer(connection, level);
 } catch(const std::exception& exception) {
 	ProcessError(exception.what());
 }

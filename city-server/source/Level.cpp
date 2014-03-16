@@ -13,6 +13,8 @@ const regex Level::LEVEL_FILE_LINE_PATTERN(
 Level::Level(const std::string& filename) :
 	last_player_id(0)
 {
+	std::srand(std::time(NULL));
+
 	int minimal_x = 0;
 	int minimal_y = 0;
 	int maximal_x = 0;
@@ -89,43 +91,55 @@ Level::operator std::string(void) const {
 }
 
 size_t Level::addPlayer(void) {
+	if (not_held_positions.empty()) {
+		throw std::runtime_error("not held positions");
+	}
+
 	PlayerSmartPointer player(new Player());
-	player->position = not_held_positions[
+	player->position = not_held_positions.at(
 		std::rand() % not_held_positions.size()
-	];
+	);
 
 	players[last_player_id] = player;
 
 	return last_player_id++;
 }
 
-void Level::movePlayer(size_t player_id, Direction direction) {
-	if (players.count(player_id)) {
-		Position position = players[player_id]->position;
-		if (!isPositionHeld(position)) {
-			switch (direction) {
-				case DIRECTION_UP:
-					position.y--;
-					break;
-				case DIRECTION_RIGHT:
-					position.x++;
-					break;
-				case DIRECTION_DOWN:
-					position.y++;
-					break;
-				case DIRECTION_LEFT:
-					position.x--;
-					break;
-			}
-			players[player_id]->position = position;
-		}
+bool Level::movePlayer(size_t player_id, Direction direction) {
+	if (!players.count(player_id)) {
+		throw std::runtime_error("invalid player id");
 	}
+
+	Position position = players[player_id]->position;
+	switch (direction) {
+		case DIRECTION_UP:
+			position.y--;
+			break;
+		case DIRECTION_RIGHT:
+			position.x++;
+			break;
+		case DIRECTION_DOWN:
+			position.y++;
+			break;
+		case DIRECTION_LEFT:
+			position.x--;
+			break;
+	}
+
+	bool can_move = !isPositionHeld(position);
+	if (can_move) {
+		players[player_id]->position = position;
+	}
+
+	return can_move;
 }
 
 void Level::updatePlayerTimestamp(size_t player_id) {
-	if (players.count(player_id)) {
-		players.at(player_id)->timestamp = std::time(NULL);
+	if (!players.count(player_id)) {
+		throw std::runtime_error("invalid player id");
 	}
+
+	players.at(player_id)->timestamp = std::time(NULL);
 }
 
 void Level::removeLostPlayers(void) {
@@ -145,5 +159,5 @@ void Level::removeLostPlayers(void) {
 bool Level::isPositionHeld(const Position& position) const {
 	return
 		std::find(held_positions.begin(), held_positions.end(), position)
-		== held_positions.end();
+		!= held_positions.end();
 }

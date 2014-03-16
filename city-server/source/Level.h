@@ -3,6 +3,7 @@
 
 #include "Player.h"
 #include <boost/regex.hpp>
+#include <boost/shared_ptr.hpp>
 #include <list>
 #include <vector>
 #include <map>
@@ -19,7 +20,7 @@ public:
 	Level(const std::string& filename);
 	operator std::string(void) const;
 	size_t addPlayer(void);
-	void movePlayer(size_t player_id, Direction direction);
+	bool movePlayer(size_t player_id, Direction direction);
 	void updatePlayerTimestamp(size_t player_id);
 	void removeLostPlayers(void);
 
@@ -34,4 +35,6 @@ private:
 
 	bool isPositionHeld(const Position& position) const;
 };
+
+typedef boost::shared_ptr<Level> LevelSmartPointer;
 #endif
