@@ -4,7 +4,11 @@ CONFIG += warn_on
 CONFIG -= qt
 
 # файлы проекта
-SOURCES += source/main.cpp
+HEADERS += \
+	source/Connection.h
+SOURCES += \
+	source/Connection.cpp \
+	source/main.cpp
 
 # внешние библиотеки
 LIBS += -lboost_system -lboost_program_options -lboost_regex -lpthread
