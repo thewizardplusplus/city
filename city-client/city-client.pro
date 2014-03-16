@@ -12,7 +12,9 @@ HEADERS += \
 	source/LabelStyle.h \
 	source/Entity.h \
 	source/VariableEntity.h \
-	source/Level.h
+	source/Level.h \
+	source/Connection.h \
+	source/ConnectionOptions.h
 SOURCES += \
 	source/TextureFactory.cpp \
 	source/Sprite.cpp \
@@ -22,10 +24,18 @@ SOURCES += \
 	source/Entity.cpp \
 	source/VariableEntity.cpp \
 	source/Level.cpp \
-	source/main.cpp
+	source/main.cpp \
+	source/Connection.cpp \
+	source/ConnectionOptions.cpp
 
 # внешние библиотеки
-LIBS += -lsfml-system -lsfml-window -lsfml-graphics -lboost_regex
+LIBS += \
+	-lsfml-system \
+	-lsfml-window \
+	-lsfml-graphics \
+	-lboost_regex \
+	-lboost_system \
+	-lboost_program_options
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
