@@ -5,7 +5,7 @@ VariableEntity::VariableEntity(
 	size_t id,
 	const StringGroup& sprites_filenames
 ) try :
-	ParameterizedEntity(id, sprites_filenames.at(0)),
+	Entity(id, sprites_filenames.at(0)),
 	state(0)
 {
 	sprites.reserve(sprites_filenames.size());
@@ -32,16 +32,15 @@ void VariableEntity::setState(size_t state) {
 }
 
 void VariableEntity::setPosition(const sf::Vector2i& position) {
-	ParameterizedEntity::setPosition(position);
+	Entity::setPosition(position);
 	updateSpritesPosition();
 }
 
 void VariableEntity::render(sf::RenderWindow& render) try {
 	if (state == 0) {
-		ParameterizedEntity::render(render);
+		Entity::render(render);
 	} else {
 		sprites.at(state - 1).render(render);
-		label.render(render);
 	}
 } catch (const std::out_of_range& exception) {
 	(void)exception;

@@ -21,7 +21,6 @@ public:
 	sf::Vector2i getPosition(void) const;
 	void setPosition(int x, int y);
 	void setPosition(const sf::Vector2i& position);
-	void setEntityParameter(size_t id, const std::string& parameter);
 	void setEntityState(size_t id, size_t state);
 	void addPlayer(size_t id);
 	void removePlayer(size_t id);

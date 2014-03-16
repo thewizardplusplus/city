@@ -11,7 +11,6 @@ HEADERS += \
 	source/Label.h \
 	source/LabelStyle.h \
 	source/Entity.h \
-	source/ParameterizedEntity.h \
 	source/VariableEntity.h \
 	source/Level.h
 SOURCES += \
@@ -21,7 +20,6 @@ SOURCES += \
 	source/Label.cpp \
 	source/LabelStyle.cpp \
 	source/Entity.cpp \
-	source/ParameterizedEntity.cpp \
 	source/VariableEntity.cpp \
 	source/Level.cpp \
 	source/main.cpp

@@ -1,17 +1,17 @@
 #ifndef VARIABLEENTITY_H
 #define VARIABLEENTITY_H
 
-#include "ParameterizedEntity.h"
+#include "Entity.h"
 #include <vector>
 
 typedef std::vector<std::string> StringGroup;
 typedef std::vector<Sprite> SpriteGroup;
 
-class VariableEntity : public ParameterizedEntity {
+class VariableEntity : public Entity {
 public:
 	typedef boost::shared_ptr<VariableEntity> Pointer;
 
-	using ParameterizedEntity::setPosition;
+	using Entity::setPosition;
 
 	VariableEntity(size_t id, const StringGroup& sprites_filenames);
 	size_t getState(void) const;

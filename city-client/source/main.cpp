@@ -13,15 +13,11 @@ size_t players_number = 12;
 int main(void) try {
 	sf::RenderWindow window(
 		sf::VideoMode(Entity::SIZE * 12, Entity::SIZE * 8),
-		"Simple 2D game"
+		"2D RTS"
 	);
 
 	Level level("level.lvl");
 	BOOST_FOREACH(size_t castle_id, castle_ids) {
-		level.setEntityParameter(
-			castle_id,
-			boost::lexical_cast<std::string>(std::rand() % 100)
-		);
 		level.setEntityState(castle_id, std::rand() % 3);
 	}
 	std::vector<sf::Vector2i> players_positions;
@@ -97,10 +93,6 @@ int main(void) try {
 	for (size_t i = 0; i < players_number; ++i) {
 		size_t player_id = first_player_id + i;
 		level.addPlayer(player_id);
-		level.setEntityParameter(
-			player_id,
-			boost::lexical_cast<std::string>(std::rand() % 100)
-		);
 		level.setEntityState(player_id, std::rand() % 2);
 		level.setPlayerPosition(player_id, players_positions[i]);
 	}

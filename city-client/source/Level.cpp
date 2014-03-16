@@ -40,7 +40,6 @@ Level::Level(const std::string& filename) {
 					id,
 					sprites_filenames
 				));
-				castle_entity->setParameter("0");
 
 				entity = castle_entity;
 				castles[id] = castle_entity;
@@ -78,18 +77,6 @@ void Level::setPosition(const sf::Vector2i& position) {
 	this->position = position;
 }
 
-void Level::setEntityParameter(size_t id, const std::string& parameter) {
-	if (castles.count(id)) {
-		castles[id]->setParameter(parameter);
-	} else if (players.count(id)) {
-		players[id]->setParameter(parameter);
-	} else {
-		std::cerr
-			<< (boost::format("Warning! Invalid entity id \"%u\".\n") % id)
-				.str();
-	}
-}
-
 void Level::setEntityState(size_t id, size_t state) {
 	if (castles.count(id)) {
 		castles[id]->setState(state);
@@ -111,7 +98,6 @@ void Level::addPlayer(size_t id) {
 		id,
 		sprites_filenames
 	));
-	player_entity->setParameter("25");
 
 	entities.push_back(player_entity);
 	players[id] = player_entity;
