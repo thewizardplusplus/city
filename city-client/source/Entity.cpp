@@ -2,12 +2,9 @@
 
 const float Entity::SIZE = 75.0f;
 
-Entity::Entity(size_t id, const std::string& sprite_filename) :
-	id(id),
-	sprite(sprite_filename)
-{
-	sprite.setSize(SIZE, SIZE);
-}
+Entity::Entity(size_t id) :
+	id(id)
+{}
 
 Entity::~Entity(void) {}
 
@@ -25,16 +22,4 @@ void Entity::setPosition(int x, int y) {
 
 void Entity::setPosition(const sf::Vector2i& position) {
 	this->position = position;
-	updateSpritePosition();
-}
-
-void Entity::render(sf::RenderWindow& render) {
-	sprite.render(render);
-}
-
-void Entity::updateSpritePosition(void) {
-	sprite.setPosition(
-		static_cast<float>(SIZE) * position.x,
-		static_cast<float>(SIZE) * position.y
-	);
 }

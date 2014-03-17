@@ -1,7 +1,7 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include "Entity.h"
+#include "StaticEntity.h"
 #include "VariableEntity.h"
 #include <boost/regex.hpp>
 #include <boost/thread.hpp>
@@ -9,8 +9,8 @@
 #include <vector>
 #include <map>
 
-typedef std::vector<Entity::Pointer> EntityGroup;
-typedef std::map<size_t, VariableEntity::Pointer> VariableEntityGroup;
+typedef std::vector<StaticEntitySmartPointer> StaticEntityGroup;
+typedef std::map<size_t, VariableEntitySmartPointer> VariableEntityGroup;
 
 class Level {
 public:
@@ -31,8 +31,7 @@ public:
 private:
 	size_t player_id;
 	sf::Vector2i position;
-	EntityGroup entities;
-	VariableEntityGroup castles;
+	StaticEntityGroup static_entities;
 	VariableEntityGroup players;
 	boost::mutex mutex;
 };

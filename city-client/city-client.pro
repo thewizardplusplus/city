@@ -5,28 +5,24 @@ CONFIG -= qt
 
 # файлы проекта
 HEADERS += \
-	source/TextureFactory.h \
 	source/Sprite.h \
-	source/FontFactory.h \
-	source/Label.h \
-	source/LabelStyle.h \
 	source/Entity.h \
 	source/VariableEntity.h \
 	source/Level.h \
 	source/Connection.h \
-	source/ConnectionOptions.h
+	source/ConnectionOptions.h \
+    source/SpriteFactory.h \
+    source/StaticEntity.h
 SOURCES += \
-	source/TextureFactory.cpp \
 	source/Sprite.cpp \
-	source/FontFactory.cpp \
-	source/Label.cpp \
-	source/LabelStyle.cpp \
 	source/Entity.cpp \
 	source/VariableEntity.cpp \
 	source/Level.cpp \
 	source/main.cpp \
 	source/Connection.cpp \
-	source/ConnectionOptions.cpp
+	source/ConnectionOptions.cpp \
+    source/SpriteFactory.cpp \
+    source/StaticEntity.cpp
 
 # внешние библиотеки
 LIBS += \

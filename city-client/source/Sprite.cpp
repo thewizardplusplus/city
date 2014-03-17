@@ -1,8 +1,19 @@
 #include "Sprite.h"
+#include <boost/format.hpp>
+#include <stdexcept>
+
+using namespace boost;
 
 Sprite::Sprite(const std::string& filename) {
-	texture = TextureFactory::getInstance().loadTexture(filename);
-	sprite.SetImage(*texture);
+	bool image_loaded = image.LoadFromFile(filename);
+	if (!image_loaded) {
+		throw std::runtime_error(
+			(boost::format("Unable to load image \"%s\".") % filename)
+				.str()
+		);
+	}
+
+	sprite.SetImage(image);
 }
 
 sf::Vector2f Sprite::getPosition(void) const {

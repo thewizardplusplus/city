@@ -1,7 +1,8 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "TextureFactory.h"
+#include <SFML/Graphics.hpp>
+#include <boost/shared_ptr.hpp>
 
 class Sprite {
 public:
@@ -15,7 +16,9 @@ public:
 	void render(sf::RenderWindow& render);
 
 private:
-	Texture texture;
+	sf::Image image;
 	sf::Sprite sprite;
 };
+
+typedef boost::shared_ptr<Sprite> SpriteSmartPointer;
 #endif

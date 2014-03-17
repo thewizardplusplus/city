@@ -1,11 +1,13 @@
 #include "Level.h"
-#include "VariableEntity.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <boost/assign/list_of.hpp>
+#include <boost/foreach.hpp>
 #include <fstream>
 #include <iostream>
 
 using namespace boost;
+using namespace boost::assign;
 
 const boost::regex Level::LEVEL_FILE_LINE_PATTERN(
 	"(0|[1-9]\\d*) (tree|mountain|castle) (0|[1-9]\\d*) (0|[1-9]\\d*)"
@@ -17,11 +19,6 @@ const sf::Color Level::GRID_COLOR(128, 128, 128);
 Level::Level(size_t player_id, const std::string& filename) :
 	player_id(player_id)
 {
-	StringGroup sprites_filenames;
-	sprites_filenames.push_back("grey_castle.png");
-	sprites_filenames.push_back("red_castle.png");
-	sprites_filenames.push_back("green_castle.png");
-
 	std::ifstream in(filename.c_str());
 	while (in) {
 		std::string line;
@@ -32,21 +29,15 @@ Level::Level(size_t player_id, const std::string& filename) :
 
 		boost::smatch matches;
 		if (boost::regex_match(line, matches, LEVEL_FILE_LINE_PATTERN)) {
-			Entity::Pointer entity;
+			StaticEntitySmartPointer static_entity;
 			std::string entity_type = matches[2];
 			size_t id = boost::lexical_cast<size_t>(matches[1]);
 			if (entity_type == "tree") {
-				entity.reset(new Entity(id, "tree.png"));
+				static_entity.reset(new StaticEntity(id, "tree.png"));
 			} else if (entity_type == "mountain") {
-				entity.reset(new Entity(id, "mountain.png"));
+				static_entity.reset(new StaticEntity(id, "mountain.png"));
 			} else if (entity_type == "castle") {
-				VariableEntity::Pointer castle_entity(new VariableEntity(
-					id,
-					sprites_filenames
-				));
-
-				entity = castle_entity;
-				castles[id] = castle_entity;
+				static_entity.reset(new StaticEntity(id, "castle.png"));
 			} else {
 				std::cerr
 					<< (boost::format(
@@ -55,11 +46,11 @@ Level::Level(size_t player_id, const std::string& filename) :
 				continue;
 			}
 
-			entity->setPosition(
+			static_entity->setPosition(
 				boost::lexical_cast<size_t>(matches[3]),
 				boost::lexical_cast<size_t>(matches[4])
 			);
-			entities.push_back(entity);
+			static_entities.push_back(static_entity);
 		} else {
 			std::cerr
 				<< (boost::format(
@@ -82,9 +73,7 @@ void Level::setPosition(const sf::Vector2i& position) {
 void Level::setEntityState(size_t id, size_t state) {
 	lock_guard<boost::mutex> guard(mutex);
 
-	if (castles.count(id)) {
-		castles[id]->setState(state);
-	} else if (players.count(id)) {
+	if (players.count(id)) {
 		players[id]->setState(state);
 	} else {
 		std::cerr
@@ -96,14 +85,10 @@ void Level::setEntityState(size_t id, size_t state) {
 void Level::addPlayer(size_t id) {
 	lock_guard<boost::mutex> guard(mutex);
 
-	StringGroup sprites_filenames;
-	sprites_filenames.push_back("green_player.png");
-	sprites_filenames.push_back("red_player.png");
-
-	players[id] = VariableEntity::Pointer(
+	players[id] = VariableEntitySmartPointer(
 		new VariableEntity(
 			id,
-			sprites_filenames
+			list_of<std::string>("green_player.png")("red_player.png")
 		)
 	);
 }
@@ -139,17 +124,14 @@ void Level::render(sf::RenderWindow& render) {
 		)
 	);
 
-	EntityGroup::const_iterator i = entities.begin();
-	for (; i != entities.end(); ++i) {
-		Entity::Pointer entity = *i;
-		entity->setPosition(entity->getPosition() - position);
-		entity->render(render);
-		entity->setPosition(entity->getPosition() + position);
+	BOOST_FOREACH(StaticEntitySmartPointer static_entity, static_entities) {
+		static_entity->setPosition(static_entity->getPosition() - position);
+		static_entity->render(render);
+		static_entity->setPosition(static_entity->getPosition() + position);
 	}
 
-	VariableEntityGroup::const_iterator j = players.begin();
-	for (; j != players.end(); ++i) {
-		VariableEntity::Pointer player = j->second;
+	BOOST_FOREACH(VariableEntityGroup::value_type player_wrapper, players) {
+		VariableEntitySmartPointer player = player_wrapper.second;
 		player->setPosition(player->getPosition() - position);
 		player->render(render);
 		player->setPosition(player->getPosition() + position);
