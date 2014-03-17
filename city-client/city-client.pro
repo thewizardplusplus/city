@@ -11,8 +11,7 @@ HEADERS += \
 	source/Level.h \
 	source/Connection.h \
 	source/ConnectionOptions.h \
-    source/SpriteFactory.h \
-    source/StaticEntity.h
+	source/SpriteFactory.h
 SOURCES += \
 	source/Sprite.cpp \
 	source/Entity.cpp \
@@ -21,8 +20,7 @@ SOURCES += \
 	source/main.cpp \
 	source/Connection.cpp \
 	source/ConnectionOptions.cpp \
-    source/SpriteFactory.cpp \
-    source/StaticEntity.cpp
+	source/SpriteFactory.cpp
 
 # внешние библиотеки
 LIBS += \

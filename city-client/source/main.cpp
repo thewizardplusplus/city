@@ -22,31 +22,7 @@ void CleanerThreadFunction(
 		std::string world_description = connection->request(
 			(format("w:%u") % level->getPlayerId()).str()
 		);
-		std::cerr << world_description << '\n';
-
-		level->removeAllPlayer();
-
-		std::vector<std::string> players;
-		split(players, world_description, is_any_of(";"));
-		BOOST_FOREACH(std::string player_decription, players) {
-			std::vector<std::string> player_data;
-			split(player_data, player_decription, is_any_of(":"));
-
-			size_t player_id = lexical_cast<size_t>(player_data[0]);
-			//level->addPlayer(player_id);
-			level->setEntityState(player_id, player_id != level->getPlayerId());
-			sf::Vector2i position(
-				lexical_cast<int>(player_data[1]),
-				lexical_cast<int>(player_data[2])
-			);
-			if (player_id != level->getPlayerId()) {
-				level->setPlayerPosition(player_id, position);
-			} else {
-				level->setPosition(
-					position - sf::Vector2i(LEVEL_WIDTH, LEVEL_HEIGHT) / 2
-				);
-			}
-		}
+		level->update(world_description);
 	}
 }
 
@@ -66,7 +42,13 @@ int main(void) try {
 	ConnectionSmartPointer connection(new Connection());
 	size_t player_id = lexical_cast<size_t>(connection->request("r"));
 
-	LevelSmartPointer level(new Level(player_id, "level.lvl"));
+	LevelSmartPointer level(
+		new Level(
+			player_id,
+			sf::Vector2i(LEVEL_WIDTH, LEVEL_HEIGHT),
+			"level.lvl"
+		)
+	);
 	StartCleanerThread(connection, level);
 	while (window.IsOpened()) {
 		sf::Event event;

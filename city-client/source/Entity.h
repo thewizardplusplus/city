@@ -14,7 +14,6 @@ public:
 	sf::Vector2i getPosition(void) const;
 	void setPosition(int x, int y);
 	void setPosition(const sf::Vector2i& position);
-	virtual void render(sf::RenderWindow& render) = 0;
 
 protected:
 	size_t id;

@@ -1,15 +1,25 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include "StaticEntity.h"
+#include "Sprite.h"
+#include "Entity.h"
 #include "VariableEntity.h"
 #include <boost/regex.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <map>
+#include <vector>
 
-typedef std::vector<StaticEntitySmartPointer> StaticEntityGroup;
+enum SpriteNames {
+	SPRITE_TREE,
+	SPRITE_MOUNTAIN,
+	SPRITE_CASTLE,
+	SPRITE_GREEN_PLAYER,
+	SPRITE_RED_PLAYER
+};
+
+typedef std::map<SpriteNames, SpriteSmartPointer> SpriteGroup;
+typedef std::vector<EntitySmartPointer> EntityGroup;
 typedef std::map<size_t, VariableEntitySmartPointer> VariableEntityGroup;
 
 class Level {
@@ -19,21 +29,28 @@ public:
 	static const float GRID_THICKNESS;
 	static const sf::Color GRID_COLOR;
 
-	Level(size_t player_id, const std::string& filename);
+	Level(
+		size_t player_id,
+		const sf::Vector2i& visual_size,
+		const std::string& filename
+	);
 	size_t getPlayerId(void);
-	void setPosition(const sf::Vector2i& position);
-	void setEntityState(size_t id, size_t state);
-	void addPlayer(size_t id);
-	void setPlayerPosition(size_t id, const sf::Vector2i& position);
-	void removeAllPlayer(void);
+	void update(const std::string& description);
 	void render(sf::RenderWindow& render);
 
 private:
+	SpriteGroup sprites;
 	size_t player_id;
+	sf::Vector2i visual_size;
 	sf::Vector2i position;
-	StaticEntityGroup static_entities;
+	EntityGroup trees;
+	EntityGroup mountains;
+	EntityGroup castles;
 	VariableEntityGroup players;
 	boost::mutex mutex;
+
+	void setEntityState(size_t id, size_t state);
+	void setPlayerPosition(size_t id, const sf::Vector2i& position);
 };
 
 typedef boost::shared_ptr<Level> LevelSmartPointer;
