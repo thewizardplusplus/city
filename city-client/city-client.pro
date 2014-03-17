@@ -35,7 +35,8 @@ LIBS += \
 	-lsfml-graphics \
 	-lboost_regex \
 	-lboost_system \
-	-lboost_program_options
+	-lboost_program_options \
+	-lboost_thread
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2

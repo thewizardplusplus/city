@@ -19,7 +19,9 @@ public:
 	static const float GRID_THICKNESS;
 	static const sf::Color GRID_COLOR;
 
-	Level(const std::string& filename);
+	Level(size_t player_id, const std::string& filename);
+	size_t getPlayerId(void);
+	void setPosition(const sf::Vector2i& position);
 	void setEntityState(size_t id, size_t state);
 	void addPlayer(size_t id);
 	void setPlayerPosition(size_t id, const sf::Vector2i& position);
@@ -27,6 +29,7 @@ public:
 	void render(sf::RenderWindow& render);
 
 private:
+	size_t player_id;
 	sf::Vector2i position;
 	EntityGroup entities;
 	VariableEntityGroup castles;

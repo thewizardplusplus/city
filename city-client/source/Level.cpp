@@ -14,7 +14,9 @@ const sf::Color Level::BACKGROUND_COLOR(0x22, 0x8b, 0x22);
 const float Level::GRID_THICKNESS = 2.0f;
 const sf::Color Level::GRID_COLOR(128, 128, 128);
 
-Level::Level(const std::string& filename) {
+Level::Level(size_t player_id, const std::string& filename) :
+	player_id(player_id)
+{
 	StringGroup sprites_filenames;
 	sprites_filenames.push_back("grey_castle.png");
 	sprites_filenames.push_back("red_castle.png");
@@ -65,6 +67,16 @@ Level::Level(const std::string& filename) {
 				) % line).str();
 		}
 	}
+}
+
+size_t Level::getPlayerId(void) {
+	lock_guard<boost::mutex> guard(mutex);
+	return player_id;
+}
+
+void Level::setPosition(const sf::Vector2i& position) {
+	lock_guard<boost::mutex> guard(mutex);
+	this->position = position;
 }
 
 void Level::setEntityState(size_t id, size_t state) {
