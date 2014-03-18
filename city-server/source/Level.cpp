@@ -96,14 +96,15 @@ size_t Level::addPlayer(void) {
 	lock_guard<boost::mutex> guard(mutex);
 
 	if (not_held_positions.empty()) {
-		throw std::runtime_error("not held positions");
+		throw std::runtime_error("all positions're held");
 	}
+	Position position = not_held_positions[
+		std::rand() % not_held_positions.size()
+	];
+	holdPosition(position);
 
 	PlayerSmartPointer player(new Player());
-	player->position = not_held_positions.at(
-		std::rand() % not_held_positions.size()
-	);
-
+	player->position = position;
 	players[last_player_id] = player;
 
 	return last_player_id++;
@@ -134,6 +135,9 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 
 	bool can_move = !isPositionHeld(position);
 	if (can_move) {
+		holdPosition(position);
+		unholdPosition(players[player_id]->position);
+
 		players[player_id]->position = position;
 	}
 
@@ -159,6 +163,7 @@ void Level::removeLostPlayers(void) {
 		if (
 			current_timestamp - i->second->timestamp >= MAXIMAL_PLAYER_TIMEOUT
 		) {
+			unholdPosition(i->second->position);
 			players.erase(i++);
 		} else {
 			++i;
@@ -170,4 +175,34 @@ bool Level::isPositionHeld(const Position& position) const {
 	return
 		std::find(held_positions.begin(), held_positions.end(), position)
 		!= held_positions.end();
+}
+
+void Level::holdPosition(const Position& position) {
+	if (!isPositionHeld(position)) {
+		held_positions.push_back(position);
+
+		not_held_positions.erase(
+			std::remove(
+				not_held_positions.begin(),
+				not_held_positions.end(),
+				position
+			),
+			not_held_positions.end()
+		);
+	}
+}
+
+void Level::unholdPosition(const Position& position) {
+	if (isPositionHeld(position)) {
+		held_positions.erase(
+			std::remove(
+				held_positions.begin(),
+				held_positions.end(),
+				position
+			),
+			held_positions.end()
+		);
+
+		not_held_positions.push_back(position);
+	}
 }

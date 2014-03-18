@@ -5,7 +5,6 @@
 #include <boost/regex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
-#include <list>
 #include <vector>
 #include <map>
 
@@ -30,13 +29,15 @@ public:
 private:
 	static const boost::regex LEVEL_FILE_LINE_PATTERN;
 
-	std::list<Position> held_positions;
+	std::vector<Position> held_positions;
 	std::vector<Position> not_held_positions;
 	size_t last_player_id;
 	std::map<size_t, PlayerSmartPointer> players;
 	boost::mutex mutex;
 
 	bool isPositionHeld(const Position& position) const;
+	void holdPosition(const Position& position);
+	void unholdPosition(const Position& position);
 };
 
 typedef boost::shared_ptr<Level> LevelSmartPointer;
