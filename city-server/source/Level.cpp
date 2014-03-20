@@ -99,17 +99,11 @@ Level::operator std::string(void) {
 size_t Level::addPlayer(void) {
 	lock_guard<boost::mutex> guard(mutex);
 
-	if (not_held_positions.empty()) {
-		throw std::runtime_error("all positions're held");
-	}
-	Position position = not_held_positions[
-		std::rand() % not_held_positions.size()
-	];
-	holdPosition(position);
+	size_t default_health = getDefaultHealth();
+	players[last_player_id] = PlayerSmartPointer(new Player(default_health));
 
-	PlayerSmartPointer player(new Player());
-	player->position = position;
-	players[last_player_id] = player;
+	players[last_player_id]->position = getRandomUnholdPosition();
+	holdPosition(players[last_player_id]->position);
 
 	return last_player_id++;
 }
@@ -148,6 +142,7 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 		if (enemy_id) {
 			float attack_factor =
 				std::rand()
+				/ RAND_MAX
 				* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
 				+ MINIMAL_ATTACK_FACTOR;
 			size_t attack_value = static_cast<size_t>(
@@ -223,6 +218,29 @@ void Level::unholdPosition(const Position& position) {
 	}
 }
 
+Position Level::getRandomUnholdPosition(void) const {
+	if (not_held_positions.empty()) {
+		throw std::runtime_error("all positions're held");
+	}
+
+	return not_held_positions[std::rand() % not_held_positions.size()];
+}
+
+size_t Level::getDefaultHealth(void) const {
+	if (!players.empty()) {
+		size_t health_sum = 0;
+		std::map<size_t, PlayerSmartPointer>::const_iterator i =
+			players.begin();
+		for (; i != players.end(); ++i) {
+			health_sum += i->second->health;
+		}
+
+		return health_sum / players.size();
+	} else {
+		return Player::DEFAULT_HEALTH;
+	}
+}
+
 size_t Level::getPlayerByPosition(const Position& position) const {
 	std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
 	for (; i != players.end(); ++i) {
@@ -244,23 +262,8 @@ void Level::decreasePlayerHealth(size_t player_id, size_t value) {
 
 void Level::resetPlayer(size_t player_id) {
 	unholdPosition(players[player_id]->position);
-	if (not_held_positions.empty()) {
-		throw std::runtime_error("all positions're held");
-	}
-	Position position = not_held_positions[
-		std::rand() % not_held_positions.size()
-	];
-	players[player_id]->position = position;
-	holdPosition(position);
+	players[player_id]->position = getRandomUnholdPosition();
+	holdPosition(players[player_id]->position);
 
-	if (!players.empty()) {
-		size_t health_sum = 0;
-		std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
-		for (; i != players.end(); ++i) {
-			health_sum += i->second->health;
-		}
-		players[player_id]->health = health_sum / players.size();
-	} else {
-		players[player_id]->health = Player::DEFAULT_HEALTH;
-	}
+	players[player_id]->health = getDefaultHealth();
 }

@@ -41,6 +41,8 @@ private:
 	bool isPositionHeld(const Position& position) const;
 	void holdPosition(const Position& position);
 	void unholdPosition(const Position& position);
+	Position getRandomUnholdPosition(void) const;
+	size_t getDefaultHealth(void) const;
 	size_t getPlayerByPosition(const Position& position) const;
 	void decreasePlayerHealth(size_t player_id, size_t value);
 	void resetPlayer(size_t player_id);

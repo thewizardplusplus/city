@@ -12,7 +12,7 @@ public:
 	time_t timestamp;
 	size_t health;
 
-	Player(void);
+	Player(size_t health);
 };
 
 typedef boost::shared_ptr<Player> PlayerSmartPointer;
