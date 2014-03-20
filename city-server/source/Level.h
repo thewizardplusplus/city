@@ -17,7 +17,10 @@ enum Direction {
 
 class Level {
 public:
+	static const size_t START_PLAYER_ID = 1;
 	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
+	static const float MINIMAL_ATTACK_FACTOR;
+	static const float MAXIMAL_ATTACK_FACTOR;
 
 	Level(const std::string& filename);
 	operator std::string(void);
@@ -38,6 +41,9 @@ private:
 	bool isPositionHeld(const Position& position) const;
 	void holdPosition(const Position& position);
 	void unholdPosition(const Position& position);
+	size_t getPlayerByPosition(const Position& position) const;
+	void decreasePlayerHealth(size_t player_id, size_t value);
+	void resetPlayer(size_t player_id);
 };
 
 typedef boost::shared_ptr<Level> LevelSmartPointer;

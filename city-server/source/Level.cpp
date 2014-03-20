@@ -1,17 +1,20 @@
 #include "Level.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include <boost/foreach.hpp>
 #include <fstream>
 #include <ctime>
 
 using namespace boost;
 
+const float Level::MINIMAL_ATTACK_FACTOR = 0.75;
+const float Level::MAXIMAL_ATTACK_FACTOR = 1.25;
 const regex Level::LEVEL_FILE_LINE_PATTERN(
 	"(0|[1-9]\\d*) (tree|mountain|castle) (0|[1-9]\\d*) (0|[1-9]\\d*)"
 );
 
 Level::Level(const std::string& filename) :
-	last_player_id(0)
+	last_player_id(START_PLAYER_ID)
 {
 	std::srand(std::time(NULL));
 
@@ -82,8 +85,9 @@ Level::operator std::string(void) {
 	std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
 	for (; i != players.end(); ++i) {
 		result +=
-			(format("%u:%i:%i;")
+			(format("%u:%u:%i:%i;")
 				% i->first
+				% i->second->health
 				% i->second->position.x
 				% i->second->position.y).str();
 	}
@@ -139,6 +143,18 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 		unholdPosition(players[player_id]->position);
 
 		players[player_id]->position = position;
+	} else {
+		size_t enemy_id = getPlayerByPosition(position);
+		if (enemy_id) {
+			float attack_factor =
+				std::rand()
+				* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
+				+ MINIMAL_ATTACK_FACTOR;
+			size_t attack_value = static_cast<size_t>(
+				std::floor(attack_factor * players[player_id]->health + 0.5f)
+			);
+			decreasePlayerHealth(enemy_id, attack_value);
+		}
 	}
 
 	return can_move;
@@ -204,5 +220,47 @@ void Level::unholdPosition(const Position& position) {
 		);
 
 		not_held_positions.push_back(position);
+	}
+}
+
+size_t Level::getPlayerByPosition(const Position& position) const {
+	std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
+	for (; i != players.end(); ++i) {
+		if (i->second->position == position) {
+			return i->first;
+		}
+	}
+
+	return START_PLAYER_ID - 1;
+}
+
+void Level::decreasePlayerHealth(size_t player_id, size_t value) {
+	if (players[player_id]->health > value) {
+		players[player_id]->health -= value;
+	} else {
+		resetPlayer(player_id);
+	}
+}
+
+void Level::resetPlayer(size_t player_id) {
+	unholdPosition(players[player_id]->position);
+	if (not_held_positions.empty()) {
+		throw std::runtime_error("all positions're held");
+	}
+	Position position = not_held_positions[
+		std::rand() % not_held_positions.size()
+	];
+	players[player_id]->position = position;
+	holdPosition(position);
+
+	if (!players.empty()) {
+		size_t health_sum = 0;
+		std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
+		for (; i != players.end(); ++i) {
+			health_sum += i->second->health;
+		}
+		players[player_id]->health = health_sum / players.size();
+	} else {
+		players[player_id]->health = Player::DEFAULT_HEALTH;
 	}
 }

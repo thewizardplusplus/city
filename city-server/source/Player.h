@@ -6,8 +6,11 @@
 
 class Player {
 public:
+	static const size_t DEFAULT_HEALTH = 25;
+
 	Position position;
 	time_t timestamp;
+	size_t health;
 
 	Player(void);
 };
