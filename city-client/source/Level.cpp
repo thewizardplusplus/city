@@ -44,6 +44,10 @@ Level::Level(
 		sprite.second->setSize(Entity::SIZE, Entity::SIZE);
 	}
 
+	label.SetSize(Entity::SIZE / 4.0f);
+	label.SetStyle(sf::String::Bold);
+	label.SetColor(sf::Color::White);
+
 	std::ifstream in(filename.c_str());
 	while (in) {
 		std::string line;
@@ -111,11 +115,12 @@ void Level::update(const std::string& description) {
 		this->players[player_id] = VariableEntitySmartPointer(
 			new VariableEntity(player_id, 2)
 		);
+		this->players[player_id]->setParameter(player_data[1]);
 
 		setEntityState(player_id, player_id != this->player_id);
 		sf::Vector2i position(
-			lexical_cast<int>(player_data[1]),
-			lexical_cast<int>(player_data[2])
+			lexical_cast<int>(player_data[2]),
+			lexical_cast<int>(player_data[3])
 		);
 		setPlayerPosition(player_id, position);
 		if (player_id == this->player_id) {
@@ -170,11 +175,16 @@ void Level::render(sf::RenderWindow& render) {
 		SpriteNames player_sprite_name =
 			player->getState() == 0 ? SPRITE_GREEN_PLAYER : SPRITE_RED_PLAYER;
 		sf::Vector2i position = player->getPosition() - this->position;
-		sprites[player_sprite_name]->setPosition(
+		sf::Vector2f real_position(
 			Entity::SIZE * position.x,
 			Entity::SIZE * position.y
 		);
+		sprites[player_sprite_name]->setPosition(real_position);
 		sprites[player_sprite_name]->render(render);
+
+		label.SetText(player->getParameter());
+		label.SetPosition(real_position);
+		render.Draw(label);
 	}
 
 	for (int y = 0; y < render_size.y; y += Entity::SIZE) {

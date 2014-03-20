@@ -40,6 +40,7 @@ public:
 
 private:
 	SpriteGroup sprites;
+	sf::String label;
 	size_t player_id;
 	sf::Vector2i visual_size;
 	sf::Vector2i position;

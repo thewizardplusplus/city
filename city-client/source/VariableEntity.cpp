@@ -16,6 +16,14 @@ VariableEntity::VariableEntity(
 	}
 }
 
+std::string VariableEntity::getParameter(void) const {
+	return parameter;
+}
+
+void VariableEntity::setParameter(const std::string& value) {
+	parameter = value;
+}
+
 size_t VariableEntity::getState(void) const {
 	return state;
 }
