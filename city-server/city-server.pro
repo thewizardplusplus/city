@@ -8,13 +8,15 @@ HEADERS += \
 	source/Connection.h \
 	source/Position.h \
 	source/Player.h \
-	source/Level.h
+	source/Level.h \
+    source/Castle.h
 SOURCES += \
 	source/Connection.cpp \
 	source/main.cpp \
 	source/Position.cpp \
 	source/Player.cpp \
-	source/Level.cpp
+	source/Level.cpp \
+    source/Castle.cpp
 
 # внешние библиотеки
 LIBS += \

@@ -14,7 +14,7 @@ const regex Level::LEVEL_FILE_LINE_PATTERN(
 );
 
 Level::Level(const std::string& filename) :
-	last_player_id(START_PLAYER_ID)
+	last_id(0)
 {
 	std::srand(std::time(NULL));
 
@@ -39,20 +39,30 @@ Level::Level(const std::string& filename) :
 				|| entity_type == "mountain"
 				|| entity_type == "castle"
 			) {
-				int x = lexical_cast<int>(matches[3]);
-				int y = lexical_cast<int>(matches[4]);
+				last_id = lexical_cast<size_t>(matches[1]);
 
-				held_positions.push_back(Position(x, y));
+				Position position(
+					lexical_cast<int>(matches[3]),
+					lexical_cast<int>(matches[4])
+				);
 
-				if (x < minimal_x) {
-					minimal_x = x;
-				} else if (x > maximal_x) {
-					maximal_x = x;
+				held_positions.push_back(position);
+				if (entity_type == "castle") {
+					castles[last_id] = CastleSmartPointer(
+						new Castle()
+					);
+					castles[last_id]->position = position;
 				}
-				if (y < minimal_y) {
-					minimal_y = y;
-				} else if (y > maximal_y) {
-					maximal_y = y;
+
+				if (position.x < minimal_x) {
+					minimal_x = position.x;
+				} else if (position.x > maximal_x) {
+					maximal_x = position.x;
+				}
+				if (position.y < minimal_y) {
+					minimal_y = position.y;
+				} else if (position.y > maximal_y) {
+					maximal_y = position.y;
 				}
 			} else {
 				std::cerr
@@ -82,14 +92,18 @@ Level::operator std::string(void) {
 	lock_guard<boost::mutex> guard(mutex);
 
 	std::string result;
-	std::map<size_t, PlayerSmartPointer>::const_iterator i = players.begin();
-	for (; i != players.end(); ++i) {
+	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
+	for (; i != castles.end(); ++i) {
+		result += (format("c:%u:%u;") % i->first % i->second->health).str();
+	}
+	std::map<size_t, PlayerSmartPointer>::const_iterator j = players.begin();
+	for (; j != players.end(); ++j) {
 		result +=
-			(format("%u:%u:%i:%i;")
-				% i->first
-				% i->second->health
-				% i->second->position.x
-				% i->second->position.y).str();
+			(format("p:%u:%u:%i:%i;")
+				% j->first
+				% j->second->health
+				% j->second->position.x
+				% j->second->position.y).str();
 	}
 	result = result.substr(0, result.length() - 1);
 
@@ -99,13 +113,15 @@ Level::operator std::string(void) {
 size_t Level::addPlayer(void) {
 	lock_guard<boost::mutex> guard(mutex);
 
+	last_id++;
+
 	size_t default_health = getDefaultHealth();
-	players[last_player_id] = PlayerSmartPointer(new Player(default_health));
+	players[last_id] = PlayerSmartPointer(new Player(default_health));
 
-	players[last_player_id]->position = getRandomUnholdPosition();
-	holdPosition(players[last_player_id]->position);
+	players[last_id]->position = getRandomUnholdPosition();
+	holdPosition(players[last_id]->position);
 
-	return last_player_id++;
+	return last_id;
 }
 
 bool Level::movePlayer(size_t player_id, Direction direction) {
@@ -138,17 +154,15 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 
 		players[player_id]->position = position;
 	} else {
+		size_t attack_value = getAttackValue(players[player_id]->health);
 		size_t enemy_id = getPlayerByPosition(position);
-		if (enemy_id) {
-			float attack_factor =
-				std::rand()
-				/ RAND_MAX
-				* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
-				+ MINIMAL_ATTACK_FACTOR;
-			size_t attack_value = static_cast<size_t>(
-				std::floor(attack_factor * players[player_id]->health + 0.5f)
-			);
+		if (enemy_id != INVALID_ID) {
 			decreasePlayerHealth(enemy_id, attack_value);
+		} else {
+			size_t enemy_id = getCastleByPosition(position);
+			if (enemy_id != INVALID_ID) {
+				decreaseCastleHealth(enemy_id, attack_value);
+			}
 		}
 	}
 
@@ -218,6 +232,38 @@ void Level::unholdPosition(const Position& position) {
 	}
 }
 
+size_t Level::getAttackValue(size_t base_value) const {
+	float attack_factor =
+		std::rand()
+		/ RAND_MAX
+		* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
+		+ MINIMAL_ATTACK_FACTOR;
+	return static_cast<size_t>(std::floor(attack_factor * base_value + 0.5f));
+}
+
+size_t Level::getCastleByPosition(const Position& position) const {
+	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
+	for (; i != castles.end(); ++i) {
+		if (i->second->position == position) {
+			return i->first;
+		}
+	}
+
+	return INVALID_ID;
+}
+
+void Level::decreaseCastleHealth(size_t castle_id, size_t value) {
+	if (castles[castle_id]->health > value) {
+		castles[castle_id]->health -= value;
+	} else {
+		resetCastle(castle_id);
+	}
+}
+
+void Level::resetCastle(size_t castle_id) {
+	castles[castle_id]->health = Castle::DEFAULT_HEALTH;
+}
+
 Position Level::getRandomUnholdPosition(void) const {
 	if (not_held_positions.empty()) {
 		throw std::runtime_error("all positions're held");
@@ -249,7 +295,7 @@ size_t Level::getPlayerByPosition(const Position& position) const {
 		}
 	}
 
-	return START_PLAYER_ID - 1;
+	return INVALID_ID;
 }
 
 void Level::decreasePlayerHealth(size_t player_id, size_t value) {
