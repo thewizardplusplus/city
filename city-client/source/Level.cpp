@@ -75,10 +75,10 @@ Level::Level(
 
 				mountains.push_back(mountain);
 			} else if (entity_type == "castle") {
-				EntitySmartPointer castle(new Entity(id));
-				castle->setPosition(position);
-
-				castles.push_back(castle);
+				castles[id] = VariableEntitySmartPointer(
+					new VariableEntity(id, 3)
+				);
+				castles[id]->setPosition(position);
 			} else {
 				std::cerr
 					<< (boost::format(
@@ -105,26 +105,33 @@ void Level::update(const std::string& description) {
 
 	players.clear();
 
-	std::vector<std::string> players;
-	split(players, description, is_any_of(";"));
-	BOOST_FOREACH(std::string player_decription, players) {
-		std::vector<std::string> player_data;
-		split(player_data, player_decription, is_any_of(":"));
+	std::vector<std::string> entities_description;
+	split(entities_description, description, is_any_of(";"));
+	BOOST_FOREACH(std::string entity_description, entities_description) {
+		std::vector<std::string> entity_data;
+		split(entity_data, entity_description, is_any_of(":"));
 
-		size_t player_id = lexical_cast<size_t>(player_data[0]);
-		this->players[player_id] = VariableEntitySmartPointer(
-			new VariableEntity(player_id, 2)
-		);
-		this->players[player_id]->setParameter(player_data[1]);
+		if (entity_data[0] == "c") {
+			size_t castle_id = lexical_cast<size_t>(entity_data[1]);
+			if (castles.count(castle_id)) {
+				castles[castle_id]->setParameter(entity_data[2]);
+			}
+		} else if (entity_data[0] == "p") {
+			size_t player_id = lexical_cast<size_t>(entity_data[1]);
+			this->players[player_id] = VariableEntitySmartPointer(
+				new VariableEntity(player_id, 2)
+			);
+			this->players[player_id]->setParameter(entity_data[2]);
 
-		setEntityState(player_id, player_id != this->player_id);
-		sf::Vector2i position(
-			lexical_cast<int>(player_data[2]),
-			lexical_cast<int>(player_data[3])
-		);
-		setPlayerPosition(player_id, position);
-		if (player_id == this->player_id) {
-			this->position = position - visual_size / 2;
+			setEntityState(player_id, player_id != this->player_id);
+			sf::Vector2i position(
+				lexical_cast<int>(entity_data[3]),
+				lexical_cast<int>(entity_data[4])
+			);
+			setPlayerPosition(player_id, position);
+			if (player_id == this->player_id) {
+				this->position = position - visual_size / 2;
+			}
 		}
 	}
 }
@@ -161,13 +168,19 @@ void Level::render(sf::RenderWindow& render) {
 		sprites[SPRITE_MOUNTAIN]->render(render);
 	}
 
-	BOOST_FOREACH(EntitySmartPointer static_entity, castles) {
-		sf::Vector2i position = static_entity->getPosition() - this->position;
-		sprites[SPRITE_CASTLE]->setPosition(
+	BOOST_FOREACH(VariableEntityGroup::value_type castle_wrapper, castles) {
+		VariableEntitySmartPointer castle = castle_wrapper.second;
+		sf::Vector2i position = castle->getPosition() - this->position;
+		sf::Vector2f real_position(
 			Entity::SIZE * position.x,
 			Entity::SIZE * position.y
 		);
+		sprites[SPRITE_CASTLE]->setPosition(real_position);
 		sprites[SPRITE_CASTLE]->render(render);
+
+		label.SetText(castle->getParameter());
+		label.SetPosition(real_position);
+		render.Draw(label);
 	}
 
 	BOOST_FOREACH(VariableEntityGroup::value_type player_wrapper, players) {

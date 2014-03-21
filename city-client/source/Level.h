@@ -46,7 +46,7 @@ private:
 	sf::Vector2i position;
 	EntityGroup trees;
 	EntityGroup mountains;
-	EntityGroup castles;
+	VariableEntityGroup castles;
 	VariableEntityGroup players;
 	boost::mutex mutex;
 
