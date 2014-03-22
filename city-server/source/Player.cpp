@@ -1,7 +1,7 @@
 #include "Player.h"
 #include <ctime>
 
-Player::Player(size_t health) :
+Player::Player(void) :
 	timestamp(std::time(NULL)),
-	health(health)
+	health(DEFAULT_HEALTH)
 {}

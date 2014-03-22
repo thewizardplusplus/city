@@ -19,6 +19,7 @@ enum Direction {
 class Level {
 public:
 	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
+	static const time_t MAXIMAL_CASTLE_TIMEOUT = 5;
 	static const float MINIMAL_ATTACK_FACTOR;
 	static const float MAXIMAL_ATTACK_FACTOR;
 
@@ -28,6 +29,7 @@ public:
 	bool movePlayer(size_t player_id, Direction direction);
 	void updatePlayerTimestamp(size_t player_id);
 	void removeLostPlayers(void);
+	void updateCastles(void);
 
 private:
 	static const boost::regex LEVEL_FILE_LINE_PATTERN;
@@ -47,8 +49,9 @@ private:
 	size_t getCastleByPosition(const Position& position) const;
 	void decreaseCastleHealth(size_t castle_id, size_t value, size_t player_id);
 	void resetCastle(size_t castle_id, size_t player_id);
+	void unholdCastles(size_t owner_id);
 	Position getRandomUnholdPosition(void) const;
-	size_t getDefaultHealth(void) const;
+	size_t getDefaultHealth(size_t exception_id) const;
 	size_t getPlayerByPosition(const Position& position) const;
 	void decreasePlayerHealth(size_t player_id, size_t value);
 	void resetPlayer(size_t player_id);

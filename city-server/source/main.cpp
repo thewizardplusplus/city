@@ -105,9 +105,7 @@ void StartServer(
 void CleanerThreadFunction(const LevelSmartPointer& level) {
 	while (true) {
 		level->removeLostPlayers();
-
-		boost::posix_time::seconds delay(Level::MAXIMAL_PLAYER_TIMEOUT);
-		this_thread::sleep(delay);
+		level->updateCastles();
 	}
 }
 

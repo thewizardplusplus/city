@@ -125,11 +125,10 @@ size_t Level::addPlayer(void) {
 
 	last_id++;
 
-	size_t default_health = getDefaultHealth();
-	players[last_id] = PlayerSmartPointer(new Player(default_health));
-
+	players[last_id] = PlayerSmartPointer(new Player());
 	players[last_id]->position = getRandomUnholdPosition();
 	holdPosition(players[last_id]->position);
+	players[last_id]->health = getDefaultHealth(last_id);
 
 	return last_id;
 }
@@ -202,9 +201,27 @@ void Level::removeLostPlayers(void) {
 			current_timestamp - i->second->timestamp >= MAXIMAL_PLAYER_TIMEOUT
 		) {
 			unholdPosition(i->second->position);
+			unholdCastles(i->first);
 			players.erase(i++);
 		} else {
 			++i;
+		}
+	}
+}
+
+void Level::updateCastles(void) {
+	lock_guard<boost::mutex> guard(mutex);
+
+	time_t current_timestamp = std::time(NULL);
+	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
+	for (; i != castles.end(); ++i) {
+		if (players.count(i->second->owner)) {
+			time_t elapsed_time = current_timestamp - i->second->timestamp;
+			if (elapsed_time >= MAXIMAL_CASTLE_TIMEOUT) {
+				players[i->second->owner]->health +=
+					elapsed_time / MAXIMAL_CASTLE_TIMEOUT;
+				i->second->timestamp = current_timestamp;
+			}
 		}
 	}
 }
@@ -278,8 +295,19 @@ void Level::decreaseCastleHealth(
 }
 
 void Level::resetCastle(size_t castle_id, size_t player_id) {
+	castles[castle_id]->timestamp = std::time(NULL);
 	castles[castle_id]->health = Castle::DEFAULT_HEALTH;
 	castles[castle_id]->owner = player_id;
+}
+
+void Level::unholdCastles(size_t owner_id) {
+	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
+	for (; i != castles.end(); ++i) {
+		if (i->second->owner == owner_id) {
+			i->second->health = 0;
+			i->second->owner = INVALID_ID;
+		}
+	}
 }
 
 Position Level::getRandomUnholdPosition(void) const {
@@ -290,18 +318,22 @@ Position Level::getRandomUnholdPosition(void) const {
 	return not_held_positions[std::rand() % not_held_positions.size()];
 }
 
-size_t Level::getDefaultHealth(void) const {
-	if (!players.empty()) {
+size_t Level::getDefaultHealth(size_t exception_id) const {
+	if (players.empty()) {
+		return Player::DEFAULT_HEALTH;
+	} else if (players.size() == 1) {
+		return players.begin()->second->health;
+	} else {
 		size_t health_sum = 0;
 		std::map<size_t, PlayerSmartPointer>::const_iterator i =
 			players.begin();
 		for (; i != players.end(); ++i) {
-			health_sum += i->second->health;
+			if (i->first != exception_id) {
+				health_sum += i->second->health;
+			}
 		}
 
-		return health_sum / players.size();
-	} else {
-		return Player::DEFAULT_HEALTH;
+		return health_sum / (players.size() - 1);
 	}
 }
 
@@ -329,5 +361,7 @@ void Level::resetPlayer(size_t player_id) {
 	players[player_id]->position = getRandomUnholdPosition();
 	holdPosition(players[player_id]->position);
 
-	players[player_id]->health = getDefaultHealth();
+	players[player_id]->health = getDefaultHealth(player_id);
+
+	unholdCastles(player_id);
 }

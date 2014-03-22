@@ -10,6 +10,7 @@ public:
 	static const size_t DEFAULT_HEALTH = 100;
 
 	Position position;
+	time_t timestamp;
 	size_t health;
 	size_t owner;
 
