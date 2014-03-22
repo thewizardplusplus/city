@@ -247,7 +247,7 @@ void Level::unholdPosition(const Position& position) {
 
 size_t Level::getAttackValue(size_t base_value) const {
 	float attack_factor =
-		std::rand()
+		static_cast<float>(std::rand())
 		/ RAND_MAX
 		* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
 		+ MINIMAL_ATTACK_FACTOR;
