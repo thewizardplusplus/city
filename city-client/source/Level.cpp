@@ -31,8 +31,14 @@ Level::Level(
 	sprites[SPRITE_MOUNTAIN] = SpriteFactory::getInstance().loadSprite(
 		"mountain.png"
 	);
-	sprites[SPRITE_CASTLE] = SpriteFactory::getInstance().loadSprite(
-		"castle.png"
+	sprites[SPRITE_GREY_CASTLE] = SpriteFactory::getInstance().loadSprite(
+		"grey_castle.png"
+	);
+	sprites[SPRITE_GREEN_CASTLE] = SpriteFactory::getInstance().loadSprite(
+		"green_castle.png"
+	);
+	sprites[SPRITE_RED_CASTLE] = SpriteFactory::getInstance().loadSprite(
+		"red_castle.png"
 	);
 	sprites[SPRITE_GREEN_PLAYER] = SpriteFactory::getInstance().loadSprite(
 		"green_player.png"
@@ -115,6 +121,9 @@ void Level::update(const std::string& description) {
 			size_t castle_id = lexical_cast<size_t>(entity_data[1]);
 			if (castles.count(castle_id)) {
 				castles[castle_id]->setParameter(entity_data[2]);
+				castles[castle_id]->setState(
+					lexical_cast<size_t>(entity_data[3])
+				);
 			}
 		} else if (entity_data[0] == "p") {
 			size_t player_id = lexical_cast<size_t>(entity_data[1]);
@@ -175,8 +184,14 @@ void Level::render(sf::RenderWindow& render) {
 			Entity::SIZE * position.x,
 			Entity::SIZE * position.y
 		);
-		sprites[SPRITE_CASTLE]->setPosition(real_position);
-		sprites[SPRITE_CASTLE]->render(render);
+		SpriteNames castle_sprite_name =
+			castle->getState() == 0
+				? SPRITE_GREY_CASTLE
+				: castle->getState() == 1
+					? SPRITE_GREEN_CASTLE
+					: SPRITE_RED_CASTLE;
+		sprites[castle_sprite_name]->setPosition(real_position);
+		sprites[castle_sprite_name]->render(render);
 
 		label.SetText(castle->getParameter());
 		label.SetPosition(real_position);
