@@ -1,5 +1,6 @@
 #include "Castle.h"
 
-Castle::Castle(void) :
-	health(START_HEALTH)
+Castle::Castle(size_t owner) :
+	health(START_HEALTH),
+	owner(owner)
 {}

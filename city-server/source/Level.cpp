@@ -49,7 +49,7 @@ Level::Level(const std::string& filename) :
 				held_positions.push_back(position);
 				if (entity_type == "castle") {
 					castles[last_id] = CastleSmartPointer(
-						new Castle()
+						new Castle(INVALID_ID)
 					);
 					castles[last_id]->position = position;
 				}
@@ -88,13 +88,23 @@ Level::Level(const std::string& filename) :
 	}
 }
 
-Level::operator std::string(void) {
+std::string Level::toString(size_t player_id) {
 	lock_guard<boost::mutex> guard(mutex);
 
 	std::string result;
 	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
 	for (; i != castles.end(); ++i) {
-		result += (format("c:%u:%u;") % i->first % i->second->health).str();
+		size_t castle_state =
+			i->second->owner == INVALID_ID
+				? 0
+				: i->second->owner == player_id
+					? 1
+					: 2;
+		result +=
+			(format("c:%u:%u:%u;")
+				% i->first
+				% i->second->health
+				% castle_state).str();
 	}
 	std::map<size_t, PlayerSmartPointer>::const_iterator j = players.begin();
 	for (; j != players.end(); ++j) {
@@ -160,8 +170,11 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 			decreasePlayerHealth(enemy_id, attack_value);
 		} else {
 			size_t enemy_id = getCastleByPosition(position);
-			if (enemy_id != INVALID_ID) {
-				decreaseCastleHealth(enemy_id, attack_value);
+			if (
+				enemy_id != INVALID_ID
+				&& castles[enemy_id]->owner != player_id
+			) {
+				decreaseCastleHealth(enemy_id, attack_value, player_id);
 			}
 		}
 	}
@@ -252,16 +265,21 @@ size_t Level::getCastleByPosition(const Position& position) const {
 	return INVALID_ID;
 }
 
-void Level::decreaseCastleHealth(size_t castle_id, size_t value) {
+void Level::decreaseCastleHealth(
+	size_t castle_id,
+	size_t value,
+	size_t player_id
+) {
 	if (castles[castle_id]->health > value) {
 		castles[castle_id]->health -= value;
 	} else {
-		resetCastle(castle_id);
+		resetCastle(castle_id, player_id);
 	}
 }
 
-void Level::resetCastle(size_t castle_id) {
+void Level::resetCastle(size_t castle_id, size_t player_id) {
 	castles[castle_id]->health = Castle::DEFAULT_HEALTH;
+	castles[castle_id]->owner = player_id;
 }
 
 Position Level::getRandomUnholdPosition(void) const {

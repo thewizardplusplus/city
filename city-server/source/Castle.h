@@ -11,8 +11,9 @@ public:
 
 	Position position;
 	size_t health;
+	size_t owner;
 
-	Castle(void);
+	Castle(size_t owner);
 };
 
 typedef boost::shared_ptr<Castle> CastleSmartPointer;

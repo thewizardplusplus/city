@@ -23,7 +23,7 @@ public:
 	static const float MAXIMAL_ATTACK_FACTOR;
 
 	Level(const std::string& filename);
-	operator std::string(void);
+	std::string toString(size_t player_id);
 	size_t addPlayer(void);
 	bool movePlayer(size_t player_id, Direction direction);
 	void updatePlayerTimestamp(size_t player_id);
@@ -45,8 +45,8 @@ private:
 	void unholdPosition(const Position& position);
 	size_t getAttackValue(size_t base_value) const;
 	size_t getCastleByPosition(const Position& position) const;
-	void decreaseCastleHealth(size_t castle_id, size_t value);
-	void resetCastle(size_t castle_id);
+	void decreaseCastleHealth(size_t castle_id, size_t value, size_t player_id);
+	void resetCastle(size_t castle_id, size_t player_id);
 	Position getRandomUnholdPosition(void) const;
 	size_t getDefaultHealth(void) const;
 	size_t getPlayerByPosition(const Position& position) const;

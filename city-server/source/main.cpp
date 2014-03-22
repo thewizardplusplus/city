@@ -75,7 +75,7 @@ void ProcessMessage(
 	level->updatePlayerTimestamp(player_id);
 
 	if (starts_with(message, "w")) {
-		connection->send(*level);
+		connection->send(level->toString(player_id));
 	} else if (starts_with(message, "m")) {
 		bool moved = level->movePlayer(
 			player_id,
