@@ -215,12 +215,38 @@ void Level::updateCastles(void) {
 	time_t current_timestamp = std::time(NULL);
 	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
 	for (; i != castles.end(); ++i) {
+		// пополняем отряды владельцев замков
 		if (players.count(i->second->owner)) {
 			time_t elapsed_time = current_timestamp - i->second->timestamp;
 			if (elapsed_time >= MAXIMAL_CASTLE_TIMEOUT) {
 				players[i->second->owner]->health +=
 					elapsed_time / MAXIMAL_CASTLE_TIMEOUT;
 				i->second->timestamp = current_timestamp;
+			}
+		}
+
+		// отвечаем на атаки противников
+		std::set<size_t>::const_iterator j = i->second->enemies.begin();
+		while (j != i->second->enemies.end()) {
+			size_t player_id = *j++;
+			if (players.count(player_id)) {
+				int delta_x = std::abs(
+					players[player_id]->position.x - i->second->position.x
+				);
+				int delta_y =std::abs(
+					players[player_id]->position.y - i->second->position.y
+				);
+				if (
+					(delta_x == 1
+					&& delta_y == 0)
+					|| (delta_x == 0
+					&& delta_y == 1)
+				) {
+					size_t attack_value = getAttackValue(i->second->health);
+					decreasePlayerHealth(player_id, attack_value);
+				} else {
+					i->second->enemies.erase(player_id);
+				}
 			}
 		}
 	}
@@ -289,6 +315,7 @@ void Level::decreaseCastleHealth(
 ) {
 	if (castles[castle_id]->health > value) {
 		castles[castle_id]->health -= value;
+		castles[castle_id]->enemies.insert(player_id);
 	} else {
 		resetCastle(castle_id, player_id);
 	}
@@ -298,14 +325,17 @@ void Level::resetCastle(size_t castle_id, size_t player_id) {
 	castles[castle_id]->timestamp = std::time(NULL);
 	castles[castle_id]->health = Castle::DEFAULT_HEALTH;
 	castles[castle_id]->owner = player_id;
+	castles[castle_id]->enemies.erase(player_id);
 }
 
-void Level::unholdCastles(size_t owner_id) {
+void Level::unholdCastles(size_t player_id) {
 	std::map<size_t, CastleSmartPointer>::const_iterator i = castles.begin();
 	for (; i != castles.end(); ++i) {
-		if (i->second->owner == owner_id) {
+		if (i->second->owner == player_id) {
 			i->second->health = 0;
 			i->second->owner = INVALID_ID;
+		} else {
+			i->second->enemies.erase(player_id);
 		}
 	}
 }

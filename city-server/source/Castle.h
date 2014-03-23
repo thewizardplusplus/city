@@ -3,6 +3,7 @@
 
 #include "Position.h"
 #include <boost/shared_ptr.hpp>
+#include <set>
 
 class Castle {
 public:
@@ -13,6 +14,7 @@ public:
 	time_t timestamp;
 	size_t health;
 	size_t owner;
+	std::set<size_t> enemies;
 
 	Castle(size_t owner);
 };

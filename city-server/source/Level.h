@@ -49,7 +49,7 @@ private:
 	size_t getCastleByPosition(const Position& position) const;
 	void decreaseCastleHealth(size_t castle_id, size_t value, size_t player_id);
 	void resetCastle(size_t castle_id, size_t player_id);
-	void unholdCastles(size_t owner_id);
+	void unholdCastles(size_t player_id);
 	Position getRandomUnholdPosition(void) const;
 	size_t getDefaultHealth(size_t exception_id) const;
 	size_t getPlayerByPosition(const Position& position) const;
