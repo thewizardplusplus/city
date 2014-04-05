@@ -6,7 +6,7 @@
 
 class Connection {
 public:
-	Connection(const uint port);
+	Connection(const unsigned int port);
 	void send(const std::string& message);
 	std::string receive(void);
 

@@ -1,3 +1,7 @@
+# параметры сборки, специфичные для окружения
+win32:BOOST_INCLUDES_PATH = E:\\boost_1_54_0
+win32:BOOST_LIBS_PATH = E:\\boost_1_54_0\\stage\\lib
+
 # общие настройки
 CONFIG += console
 CONFIG += warn_on
@@ -19,7 +23,17 @@ SOURCES += \
 	source/Castle.cpp
 
 # внешние библиотеки
-LIBS += \
+win32 {
+	INCLUDEPATH += $$BOOST_INCLUDES_PATH
+	LIBS += -L$$BOOST_LIBS_PATH
+	LIBS += \
+		-lboost_system-mgw48-mt-1_54 \
+		-lboost_program_options-mgw48-mt-1_54 \
+		-lboost_regex-mgw48-mt-1_54 \
+		-lboost_thread-mgw48-mt-1_54 \
+		-lws2_32
+}
+unix:LIBS += \
 	-lboost_system \
 	-lboost_program_options \
 	-lboost_regex \
@@ -27,3 +41,9 @@ LIBS += \
 
 # флаги компилятора
 QMAKE_CXXFLAGS += -std=c++03 -pedantic -Wall -W -O2
+# отключение предупреждений в Boost
+win32:QMAKE_CXXFLAGS += \
+	-Wno-long-long \
+	-Wno-unused-local-typedefs \
+	-fno-strict-aliasing \
+	-Wno-unused-variable

@@ -4,7 +4,7 @@ using namespace boost;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-Connection::Connection(const uint port) :
+Connection::Connection(const unsigned int port) :
 	socket(io_service, udp::endpoint(udp::v4(), port))
 {}
 
