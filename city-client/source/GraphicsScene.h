@@ -11,5 +11,6 @@ public:
 
 protected:
 	virtual void drawBackground(QPainter* painter, const QRectF& rectangle);
+	virtual void drawForeground(QPainter* painter, const QRectF& rectangle);
 };
 #endif

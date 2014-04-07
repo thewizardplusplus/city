@@ -4,6 +4,7 @@ win32:BOOST_LIBS_PATH = E:\\boost_1_54_0\\stage\\lib
 
 # общие настройки
 CONFIG += warn_on
+QT += svg
 
 # файлы проекта
 HEADERS += \
