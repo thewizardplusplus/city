@@ -7,10 +7,12 @@ CONFIG += warn_on
 
 # файлы проекта
 HEADERS += \
-	source/MainWindow.h
+	source/MainWindow.h \
+    source/GraphicsScene.h
 SOURCES += \
 	source/main.cpp \
-	source/MainWindow.cpp
+	source/MainWindow.cpp \
+    source/GraphicsScene.cpp
 
 # внешние библиотеки
 win32 {
