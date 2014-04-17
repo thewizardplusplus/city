@@ -3,6 +3,7 @@
 
 #include "Castle.h"
 #include "Player.h"
+#include "Skeleton.h"
 #include <boost/regex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -20,6 +21,8 @@ class Level {
 public:
 	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
 	static const time_t MAXIMAL_CASTLE_TIMEOUT = 5;
+	static const time_t SKELETON_ADDING_TIMEOUT = 30;
+	static const size_t MAXIMAL_SKELETONS_NUMBER = 7;
 	static const float MINIMAL_ATTACK_FACTOR;
 	static const float MAXIMAL_ATTACK_FACTOR;
 
@@ -30,6 +33,7 @@ public:
 	void updatePlayerTimestamp(size_t player_id);
 	void removeLostPlayers(void);
 	void updateCastles(void);
+	void addSkeleton(void);
 
 private:
 	static const boost::regex LEVEL_FILE_LINE_PATTERN;
@@ -40,6 +44,8 @@ private:
 	std::map<size_t, CastleSmartPointer> castles;
 	size_t last_id;
 	std::map<size_t, PlayerSmartPointer> players;
+	time_t last_skeleton_adding_timestamp;
+	std::map<size_t, SkeletonSmartPointer> skeletons;
 	boost::mutex mutex;
 
 	bool isPositionHeld(const Position& position) const;

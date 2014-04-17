@@ -14,7 +14,8 @@ const regex Level::LEVEL_FILE_LINE_PATTERN(
 );
 
 Level::Level(const std::string& filename) :
-	last_id(0)
+	last_id(0),
+	last_skeleton_adding_timestamp(0)
 {
 	std::srand(std::time(NULL));
 
@@ -114,6 +115,16 @@ std::string Level::toString(size_t player_id) {
 				% j->second->health
 				% j->second->position.x
 				% j->second->position.y).str();
+	}
+	std::map<size_t, SkeletonSmartPointer>::const_iterator k =
+		skeletons.begin();
+	for (; k != skeletons.end(); ++k) {
+		result +=
+			(format("s:%u:%u:%i:%i;")
+				% k->first
+				% k->second->health
+				% k->second->position.x
+				% k->second->position.y).str();
 	}
 	result = result.substr(0, result.length() - 1);
 
@@ -252,6 +263,26 @@ void Level::updateCastles(void) {
 	}
 }
 
+void Level::addSkeleton(void) {
+	lock_guard<boost::mutex> guard(mutex);
+
+	time_t current_timestamp = std::time(NULL);
+	if (
+		current_timestamp - last_skeleton_adding_timestamp
+			> SKELETON_ADDING_TIMEOUT
+		&& skeletons.size() < MAXIMAL_SKELETONS_NUMBER
+	) {
+		last_id++;
+
+		size_t health = getDefaultHealth(INVALID_ID);
+		skeletons[last_id] = SkeletonSmartPointer(new Skeleton(health));
+		skeletons[last_id]->position = getRandomUnholdPosition();
+		holdPosition(skeletons[last_id]->position);
+
+		last_skeleton_adding_timestamp = current_timestamp;
+	}
+}
+
 bool Level::isPositionHeld(const Position& position) const {
 	return
 		std::find(held_positions.begin(), held_positions.end(), position)
@@ -349,9 +380,7 @@ Position Level::getRandomUnholdPosition(void) const {
 }
 
 size_t Level::getDefaultHealth(size_t exception_id) const {
-	if (players.empty()) {
-		return Player::DEFAULT_HEALTH;
-	} else if (players.size() == 1) {
+	if (players.size() == 1) {
 		return players.begin()->second->health;
 	} else {
 		size_t health_sum = 0;
@@ -365,6 +394,8 @@ size_t Level::getDefaultHealth(size_t exception_id) const {
 
 		return health_sum / (players.size() - 1);
 	}
+
+	return Player::DEFAULT_HEALTH;
 }
 
 size_t Level::getPlayerByPosition(const Position& position) const {

@@ -23,7 +23,7 @@ std::string ConvertCharToString(char symbol) {
 
 void ProcessError(const std::string& message) {
 	std::cerr
-		<< format("City client error: %s.\n")
+		<< format("City server error: %s.\n")
 			% to_lower_copy(message)
 		<< std::flush;
 }
@@ -106,6 +106,7 @@ void CleanerThreadFunction(const LevelSmartPointer& level) {
 	while (true) {
 		level->removeLostPlayers();
 		level->updateCastles();
+		level->addSkeleton();
 	}
 }
 
