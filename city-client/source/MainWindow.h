@@ -13,6 +13,7 @@ public:
 
 private:
 	QGraphicsScene* graphics_scene;
+	QGraphicsItemGroup* root_item;
 
 	void createUi(void);
 	void loadLevel(void);

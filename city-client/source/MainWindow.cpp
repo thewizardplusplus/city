@@ -10,7 +10,8 @@
 #include <QtGui/QGraphicsPixmapItem>
 
 MainWindow::MainWindow(void) :
-	graphics_scene(NULL)
+	graphics_scene(NULL),
+	root_item(NULL)
 {
 	setWindowTitle("2D RTS");
 
@@ -27,24 +28,16 @@ bool MainWindow::eventFilter(QObject* watched_object, QEvent* event) {
 		QKeyEvent* key_event = static_cast<QKeyEvent*>(event);
 		switch (key_event->key()) {
 			case Qt::Key_Left:
-				graphics_scene->setSceneRect(
-					graphics_scene->sceneRect().translated(-75, 0)
-				);
+				root_item->setPos(root_item->pos() + QPointF(75.0f, 0.0f));
 				break;
 			case Qt::Key_Right:
-				graphics_scene->setSceneRect(
-					graphics_scene->sceneRect().translated(75, 0)
-				);
+				root_item->setPos(root_item->pos() + QPointF(-75.0f, 0.0f));
 				break;
 			case Qt::Key_Up:
-				graphics_scene->setSceneRect(
-					graphics_scene->sceneRect().translated(0, -75)
-				);
+				root_item->setPos(root_item->pos() + QPointF(0.0f, 75.0f));
 				break;
 			case Qt::Key_Down:
-				graphics_scene->setSceneRect(
-					graphics_scene->sceneRect().translated(0, 75)
-				);
+				root_item->setPos(root_item->pos() + QPointF(0.0f, -75.0f));
 				break;
 		}
 
@@ -83,6 +76,9 @@ void MainWindow::loadLevel(void) {
 		);
 		std::exit(EXIT_FAILURE);
 	}
+
+	root_item = new QGraphicsItemGroup();
+	graphics_scene->addItem(root_item);
 
 	QString level_description = level_file.readAll();
 	QStringList lines = level_description.split('\n');
@@ -123,6 +119,7 @@ void MainWindow::loadLevel(void) {
 			continue;
 		}
 
+		root_item->addToGroup(graphics_item);
 		graphics_item->setPos(
 			75 * pattern.cap(3).toInt(),
 			75 * pattern.cap(4).toInt()
