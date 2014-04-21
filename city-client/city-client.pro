@@ -9,11 +9,11 @@ QT += svg
 # файлы проекта
 HEADERS += \
 	source/MainWindow.h \
-    source/GraphicsScene.h
+	source/GraphicsScene.h
 SOURCES += \
 	source/main.cpp \
 	source/MainWindow.cpp \
-    source/GraphicsScene.cpp
+	source/GraphicsScene.cpp
 
 # внешние библиотеки
 win32 {
@@ -40,3 +40,6 @@ QMAKE_CXXFLAGS += -Wno-long-long
 win32:QMAKE_CXXFLAGS += \
 	-Wno-unused-local-typedefs \
 	-fno-strict-aliasing
+
+RESOURCES += \
+	resources/resources.qrc

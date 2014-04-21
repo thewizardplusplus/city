@@ -66,8 +66,7 @@ void MainWindow::createUi(void) {
 }
 
 void MainWindow::loadLevel(void) {
-	QString base_path = QApplication::applicationDirPath() + '/';
-	QFile level_file(base_path + "level.lvl");
+	QFile level_file(":/level.lvl");
 	if (!level_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		QMessageBox::critical(
 			NULL,
@@ -101,14 +100,14 @@ void MainWindow::loadLevel(void) {
 		QString entity_type = pattern.cap(2);
 		QGraphicsItem* graphics_item = NULL;
 		if (entity_type == "tree") {
-			graphics_item = graphics_scene->addPixmap(base_path + "tree.png");
+			graphics_item = graphics_scene->addPixmap(QPixmap(":/tree.png"));
 		} else if (entity_type == "mountain") {
 			graphics_item = graphics_scene->addPixmap(
-				base_path + "mountain.png"
+				QPixmap(":/mountain.png")
 			);
 		} else if (entity_type == "castle") {
 			graphics_item = graphics_scene->addPixmap(
-				base_path + "grey_castle.png"
+				QPixmap(":/grey_castle.png")
 			);
 		} else {
 			qDebug()
@@ -124,6 +123,5 @@ void MainWindow::loadLevel(void) {
 			75 * pattern.cap(3).toInt(),
 			75 * pattern.cap(4).toInt()
 		);
-		graphics_item->setScale(0.75);
 	}
 }

@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>green_castle.png</file>
+        <file>green_player.png</file>
+        <file>grey_castle.png</file>
+        <file>level.lvl</file>
+        <file>mountain.png</file>
+        <file>red_castle.png</file>
+        <file>red_player.png</file>
+        <file>tree.png</file>
+    </qresource>
+</RCC>
