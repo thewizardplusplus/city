@@ -12,7 +12,8 @@
 
 MainWindow::MainWindow(void) :
 	graphics_scene(NULL),
-	root_item(NULL)
+	root_item(NULL),
+	player_id(INVALID_ID)
 {
 	setWindowTitle("2D RTS");
 
@@ -29,22 +30,68 @@ bool MainWindow::eventFilter(QObject* watched_object, QEvent* event) {
 		QKeyEvent* key_event = static_cast<QKeyEvent*>(event);
 		switch (key_event->key()) {
 			case Qt::Key_Left:
-				root_item->setPos(root_item->pos() + QPointF(75.0f, 0.0f));
+				emit move(MoveDirection::LEFT);
 				break;
 			case Qt::Key_Right:
-				root_item->setPos(root_item->pos() + QPointF(-75.0f, 0.0f));
+				emit move(MoveDirection::RIGHT);
 				break;
 			case Qt::Key_Up:
-				root_item->setPos(root_item->pos() + QPointF(0.0f, 75.0f));
+				emit move(MoveDirection::UP);
 				break;
 			case Qt::Key_Down:
-				root_item->setPos(root_item->pos() + QPointF(0.0f, -75.0f));
+				emit move(MoveDirection::DOWN);
+				break;
+			case Qt::Key_Escape:
+				QApplication::quit();
 				break;
 		}
 
 		return true;
 	} else {
 		return QMainWindow::eventFilter(watched_object, event);
+	}
+}
+
+void MainWindow::updateLevel(const QString& description) {
+	foreach (size_t player_id, players.keys()) {
+		delete players[player_id];
+	}
+	players.clear();
+
+	QStringList entities_description = description.split(';');
+	foreach (QString entity_description, entities_description) {
+		QStringList entity_data = entity_description.split(':');
+		if (entity_data[0] == "c") {
+			size_t castle_id = entity_data[1].toULong();
+			if (castles.contains(castle_id)) {
+				castles[castle_id]->setParameter(entity_data[2].toULong());
+				castles[castle_id]->setState(
+					entity_data[3].toULong()
+				);
+			}
+		} else if (entity_data[0] == "p") {
+			size_t player_id = entity_data[1].toULong();
+			players[player_id] = new DynamicSprite(
+				QStringList()
+				<< "green_player"
+				<< "red_player"
+			);
+			players[player_id]->setParameter(entity_data[2].toULong());
+			players[player_id]->setState(player_id != this->player_id);
+			players[player_id]->setPos(
+				75 * entity_data[3].toFloat(),
+				75 * entity_data[4].toFloat()
+			);
+			root_item->addToGroup(players[player_id]);
+
+			if (player_id == this->player_id) {
+				root_item->setPos(
+					root_item->pos()
+					+ QPointF(12 * 75, 8 * 75) / 2
+					- QPointF(75, 75)
+				);
+			}
+		}
 	}
 }
 
@@ -107,12 +154,14 @@ void MainWindow::loadLevel(void) {
 				QPixmap(":/mountain.png")
 			);
 		} else if (entity_type == "castle") {
-			graphics_item = new DynamicSprite(
+			size_t castle_id = pattern.cap(1).toULong();
+			castles[castle_id] = new DynamicSprite(
 				QStringList()
 				<< "grey_castle"
 				<< "green_castle"
 				<< "red_castle"
 			);
+			graphics_item = castles[castle_id];
 		} else {
 			qDebug()
 				<< QString(

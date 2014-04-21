@@ -10,7 +10,8 @@ QT += svg
 HEADERS += \
 	source/MainWindow.h \
 	source/GraphicsScene.h \
-    source/DynamicSprite.h
+    source/DynamicSprite.h \
+    source/MoveDirection.h
 SOURCES += \
 	source/main.cpp \
 	source/MainWindow.cpp \

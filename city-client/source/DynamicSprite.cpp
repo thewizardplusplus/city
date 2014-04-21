@@ -12,6 +12,7 @@ DynamicSprite::DynamicSprite(const QStringList& sprites_filenames) :
 	label = new QGraphicsTextItem(this);
 	label->setFont(label_font);
 	label->setDefaultTextColor(Qt::white);
+	label->setZValue(1);
 	addToGroup(label);
 
 	setParameter(0);
