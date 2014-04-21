@@ -9,11 +9,13 @@ QT += svg
 # файлы проекта
 HEADERS += \
 	source/MainWindow.h \
-	source/GraphicsScene.h
+	source/GraphicsScene.h \
+    source/DynamicSprite.h
 SOURCES += \
 	source/main.cpp \
 	source/MainWindow.cpp \
-	source/GraphicsScene.cpp
+	source/GraphicsScene.cpp \
+    source/DynamicSprite.cpp
 
 # внешние библиотеки
 win32 {

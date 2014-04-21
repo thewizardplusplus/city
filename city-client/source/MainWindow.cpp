@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "GraphicsScene.h"
+#include "DynamicSprite.h"
 #include <QtGui/QKeyEvent>
 #include <QtGui/QGridLayout>
 #include <QtGui/QGraphicsView>
@@ -106,8 +107,11 @@ void MainWindow::loadLevel(void) {
 				QPixmap(":/mountain.png")
 			);
 		} else if (entity_type == "castle") {
-			graphics_item = graphics_scene->addPixmap(
-				QPixmap(":/grey_castle.png")
+			graphics_item = new DynamicSprite(
+				QStringList()
+				<< "grey_castle"
+				<< "green_castle"
+				<< "red_castle"
 			);
 		} else {
 			qDebug()
