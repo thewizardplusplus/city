@@ -3,14 +3,17 @@
 
 #include "MoveDirection.h"
 #include "DynamicSprite.h"
+#include "Client.h"
 #include <QtGui/QMainWindow>
 #include <QtGui/QGraphicsScene>
+#include <QtCore/QThread>
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
 	MainWindow(void);
+	virtual ~MainWindow(void);
 	virtual bool eventFilter(QObject* watched_object, QEvent* event);
 
 signals:
@@ -24,11 +27,14 @@ private:
 
 	QGraphicsScene* graphics_scene;
 	QGraphicsItemGroup* root_item;
+	Client* client;
+	QThread client_thread;
 	QMap<size_t, DynamicSprite*> castles;
 	size_t player_id;
 	QMap<size_t, DynamicSprite*> players;
 
 	void createUi(void);
 	void loadLevel(void);
+	void start(void);
 };
 #endif

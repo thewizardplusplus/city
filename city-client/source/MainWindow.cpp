@@ -23,6 +23,13 @@ MainWindow::MainWindow(void) :
 
 	createUi();
 	loadLevel();
+
+	start();
+}
+
+MainWindow::~MainWindow(void) {
+	client_thread.exit();
+	client_thread.wait(1000);
 }
 
 bool MainWindow::eventFilter(QObject* watched_object, QEvent* event) {
@@ -82,14 +89,18 @@ void MainWindow::updateLevel(const QString& description) {
 				75 * entity_data[3].toFloat(),
 				75 * entity_data[4].toFloat()
 			);
+			qDebug() << entity_data;
+			qDebug() << players[player_id]->pos();
 			root_item->addToGroup(players[player_id]);
+			qDebug() << players[player_id]->pos();
 
 			if (player_id == this->player_id) {
 				root_item->setPos(
-					root_item->pos()
+					players[player_id]->pos()
 					+ QPointF(12 * 75, 8 * 75) / 2
 					- QPointF(75, 75)
 				);
+				//qDebug() << players[player_id]->pos();
 			}
 		}
 	}
@@ -177,4 +188,34 @@ void MainWindow::loadLevel(void) {
 			75 * pattern.cap(4).toInt()
 		);
 	}
+}
+
+void MainWindow::start(void) {
+	client = new Client();
+	this->player_id = client->getPlayerId();
+	client->moveToThread(&client_thread);
+	connect(
+		&client_thread,
+		#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+			SIGNAL(finished()),
+		#else
+			SIGNAL(terminated()),
+		#endif
+		client,
+		SLOT(deleteLater())
+	);
+	qRegisterMetaType<MoveDirection::Types>("MoveDirection::Types");
+	connect(
+		this,
+		SIGNAL(move(MoveDirection::Types)),
+		client,
+		SLOT(move(MoveDirection::Types))
+	);
+	connect(
+		client,
+		SIGNAL(updateLevel(QString)),
+		this,
+		SLOT(updateLevel(QString))
+	);
+	client_thread.start();
 }

@@ -11,12 +11,18 @@ HEADERS += \
 	source/MainWindow.h \
 	source/GraphicsScene.h \
     source/DynamicSprite.h \
-    source/MoveDirection.h
+    source/MoveDirection.h \
+    source/Connection.h \
+    source/ConnectionOptions.h \
+    source/Client.h
 SOURCES += \
 	source/main.cpp \
 	source/MainWindow.cpp \
 	source/GraphicsScene.cpp \
-    source/DynamicSprite.cpp
+    source/DynamicSprite.cpp \
+    source/Connection.cpp \
+    source/ConnectionOptions.cpp \
+    source/Client.cpp
 
 # внешние библиотеки
 win32 {

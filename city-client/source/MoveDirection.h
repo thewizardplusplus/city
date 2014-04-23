@@ -4,10 +4,10 @@
 class MoveDirection {
 public:
 	enum Types {
-		LEFT,
-		RIGHT,
 		UP,
-		DOWN
+		RIGHT,
+		DOWN,
+		LEFT
 	};
 };
 #endif
