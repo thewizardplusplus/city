@@ -85,22 +85,17 @@ void MainWindow::updateLevel(const QString& description) {
 			);
 			players[player_id]->setParameter(entity_data[2].toULong());
 			players[player_id]->setState(player_id != this->player_id);
+
+			root_item->addToGroup(players[player_id]);
 			players[player_id]->setPos(
 				75 * entity_data[3].toFloat(),
 				75 * entity_data[4].toFloat()
 			);
-			qDebug() << entity_data;
-			qDebug() << players[player_id]->pos();
-			root_item->addToGroup(players[player_id]);
-			qDebug() << players[player_id]->pos();
-
 			if (player_id == this->player_id) {
 				root_item->setPos(
-					players[player_id]->pos()
-					+ QPointF(12 * 75, 8 * 75) / 2
-					- QPointF(75, 75)
+					QPointF(12 * 75, 8 * 75) / 2
+					- players[player_id]->pos()
 				);
-				//qDebug() << players[player_id]->pos();
 			}
 		}
 	}
