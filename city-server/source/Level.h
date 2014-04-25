@@ -21,8 +21,10 @@ class Level {
 public:
 	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
 	static const time_t MAXIMAL_CASTLE_TIMEOUT = 5;
-	static const time_t SKELETON_ADDING_TIMEOUT = 5;
+	static const time_t SKELETON_ADDING_TIMEOUT = 12;
 	static const size_t MAXIMAL_SKELETONS_NUMBER = 7;
+	static const float REAL_HEALHT_FACTOR;
+	static const float REAL_ATTACK_FACTOR;
 	static const float MINIMAL_ATTACK_FACTOR;
 	static const float MAXIMAL_ATTACK_FACTOR;
 

@@ -7,8 +7,10 @@
 
 using namespace boost;
 
-const float Level::MINIMAL_ATTACK_FACTOR = 0.75;
-const float Level::MAXIMAL_ATTACK_FACTOR = 1.25;
+const float Level::REAL_HEALHT_FACTOR = 2.0f;
+const float Level::REAL_ATTACK_FACTOR = 0.5f;
+const float Level::MINIMAL_ATTACK_FACTOR = 0.75f;
+const float Level::MAXIMAL_ATTACK_FACTOR = 1.25f;
 const regex Level::LEVEL_FILE_LINE_PATTERN(
 	"(0|[1-9]\\d*) (tree|mountain|castle) (0|[1-9]\\d*) (0|[1-9]\\d*)"
 );
@@ -331,7 +333,9 @@ size_t Level::getAttackValue(size_t base_value) const {
 		/ RAND_MAX
 		* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
 		+ MINIMAL_ATTACK_FACTOR;
-	return static_cast<size_t>(std::floor(attack_factor * base_value + 0.5f));
+	float value = REAL_ATTACK_FACTOR * base_value / REAL_HEALHT_FACTOR;
+
+	return static_cast<size_t>(std::floor(attack_factor * value + 0.5f));
 }
 
 size_t Level::getCastleByPosition(const Position& position) const {
