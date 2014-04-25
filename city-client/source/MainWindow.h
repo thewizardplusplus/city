@@ -32,6 +32,7 @@ private:
 	QMap<size_t, DynamicSprite*> castles;
 	size_t player_id;
 	QMap<size_t, DynamicSprite*> players;
+	QMap<size_t, DynamicSprite*> skeletons;
 
 	void createUi(void);
 	void loadLevel(void);

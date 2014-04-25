@@ -64,6 +64,10 @@ void MainWindow::updateLevel(const QString& description) {
 		delete players[player_id];
 	}
 	players.clear();
+	foreach (size_t skeleton_id, skeletons.keys()) {
+		delete skeletons[skeleton_id];
+	}
+	skeletons.clear();
 
 	QStringList entities_description = description.split(';');
 	foreach (QString entity_description, entities_description) {
@@ -79,9 +83,7 @@ void MainWindow::updateLevel(const QString& description) {
 		} else if (entity_data[0] == "p") {
 			size_t player_id = entity_data[1].toULong();
 			players[player_id] = new DynamicSprite(
-				QStringList()
-				<< "green_player"
-				<< "red_player"
+				QStringList() << "green_player" << "red_player"
 			);
 			players[player_id]->setParameter(entity_data[2].toULong());
 			players[player_id]->setState(player_id != this->player_id);
@@ -97,6 +99,18 @@ void MainWindow::updateLevel(const QString& description) {
 					- players[player_id]->pos()
 				);
 			}
+		} else if (entity_data[0] == "s") {
+			size_t skeleton_id = entity_data[1].toULong();
+			skeletons[skeleton_id] = new DynamicSprite(
+				QStringList() << "skeleton"
+			);
+			skeletons[skeleton_id]->setParameter(entity_data[2].toULong());
+
+			root_item->addToGroup(skeletons[skeleton_id]);
+			skeletons[skeleton_id]->setPos(
+				75 * entity_data[3].toFloat(),
+				75 * entity_data[4].toFloat()
+			);
 		}
 	}
 }

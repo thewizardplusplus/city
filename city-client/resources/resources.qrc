@@ -8,5 +8,6 @@
         <file>red_castle.png</file>
         <file>red_player.png</file>
         <file>tree.png</file>
+        <file>skeleton.png</file>
     </qresource>
 </RCC>
