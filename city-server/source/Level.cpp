@@ -87,6 +87,8 @@ Level::Level(const std::string& filename) :
 			}
 		}
 	}
+
+	last_skeleton_adding_timestamp = std::time(NULL);
 }
 
 std::string Level::toString(size_t player_id) {
@@ -180,11 +182,15 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 			decreasePlayerHealth(enemy_id, attack_value);
 		} else {
 			size_t enemy_id = getCastleByPosition(position);
-			if (
-				enemy_id != INVALID_ID
-				&& castles[enemy_id]->owner != player_id
-			) {
-				decreaseCastleHealth(enemy_id, attack_value, player_id);
+			if (enemy_id != INVALID_ID) {
+				if (castles[enemy_id]->owner != player_id) {
+					decreaseCastleHealth(enemy_id, attack_value, player_id);
+				}
+			} else {
+				size_t skeleton_id = getSkeletonByPosition(position);
+				if (skeleton_id != INVALID_ID) {
+					decreaseSkeletonHealth(skeleton_id, attack_value);
+				}
 			}
 		}
 	}
@@ -382,7 +388,7 @@ Position Level::getRandomUnholdPosition(void) const {
 size_t Level::getDefaultHealth(size_t exception_id) const {
 	if (players.size() == 1) {
 		return players.begin()->second->health;
-	} else {
+	} else if (players.size() > 1) {
 		size_t health_sum = 0;
 		std::map<size_t, PlayerSmartPointer>::const_iterator i =
 			players.begin();
@@ -425,4 +431,31 @@ void Level::resetPlayer(size_t player_id) {
 	players[player_id]->health = getDefaultHealth(player_id);
 
 	unholdCastles(player_id);
+}
+
+size_t Level::getSkeletonByPosition(const Position& position) const {
+	std::map<size_t, SkeletonSmartPointer>::const_iterator i =
+		skeletons.begin();
+	for (; i != skeletons.end(); ++i) {
+		if (i->second->position == position) {
+			return i->first;
+		}
+	}
+
+	return INVALID_ID;
+}
+
+void Level::decreaseSkeletonHealth(size_t skeleton_id, size_t value) {
+	if (skeletons[skeleton_id]->health > value) {
+		skeletons[skeleton_id]->health -= value;
+	} else {
+		killSkeleton(skeleton_id);
+	}
+}
+
+void Level::killSkeleton(size_t skeleton_id) {
+	unholdPosition(skeletons[skeleton_id]->position);
+	skeletons.erase(skeleton_id);
+
+	last_skeleton_adding_timestamp = std::time(NULL);
 }

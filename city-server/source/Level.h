@@ -21,7 +21,7 @@ class Level {
 public:
 	static const time_t MAXIMAL_PLAYER_TIMEOUT = 12;
 	static const time_t MAXIMAL_CASTLE_TIMEOUT = 5;
-	static const time_t SKELETON_ADDING_TIMEOUT = 30;
+	static const time_t SKELETON_ADDING_TIMEOUT = 5;
 	static const size_t MAXIMAL_SKELETONS_NUMBER = 7;
 	static const float MINIMAL_ATTACK_FACTOR;
 	static const float MAXIMAL_ATTACK_FACTOR;
@@ -61,6 +61,9 @@ private:
 	size_t getPlayerByPosition(const Position& position) const;
 	void decreasePlayerHealth(size_t player_id, size_t value);
 	void resetPlayer(size_t player_id);
+	size_t getSkeletonByPosition(const Position& position) const;
+	void decreaseSkeletonHealth(size_t skeleton_id, size_t value);
+	void killSkeleton(size_t skeleton_id);
 };
 
 typedef boost::shared_ptr<Level> LevelSmartPointer;
