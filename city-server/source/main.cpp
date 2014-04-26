@@ -107,6 +107,7 @@ void CleanerThreadFunction(const LevelSmartPointer& level) {
 		level->removeLostPlayers();
 		level->updateCastles();
 		level->addSkeleton();
+		level->updateSkeletons();
 	}
 }
 

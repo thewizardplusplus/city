@@ -4,6 +4,7 @@
 #include <boost/foreach.hpp>
 #include <fstream>
 #include <ctime>
+#include <algorithm>
 
 using namespace boost;
 
@@ -301,6 +302,19 @@ void Level::addSkeleton(void) {
 	}
 }
 
+void Level::updateSkeletons(void) {
+	std::map<size_t, SkeletonSmartPointer>::const_iterator i =
+		skeletons.begin();
+	for (; i != skeletons.end(); ++i) {
+		if (!i->second->timeout()) {
+			continue;
+		}
+		i->second->update();
+
+		skeletonRandomMove(i->first);
+	}
+}
+
 bool Level::isPositionHeld(const Position& position) const {
 	return
 		std::find(held_positions.begin(), held_positions.end(), position)
@@ -472,4 +486,112 @@ void Level::killSkeleton(size_t skeleton_id) {
 	skeletons.erase(skeleton_id);
 
 	last_skeleton_adding_timestamp = std::time(NULL);
+}
+
+std::vector<Position> Level::getNeighborhood(const Position& position) const {
+	std::vector<Position> shifts;
+	shifts.push_back(Position(-1, 0));
+	shifts.push_back(Position(1, 0));
+	shifts.push_back(Position(0, -1));
+	shifts.push_back(Position(0, 1));
+
+	std::vector<Position> positions;
+	for (
+		std::vector<Position>::const_iterator i = shifts.begin();
+		i != shifts.end();
+		++i
+	) {
+		Position new_position(position.x + i->x, position.y + i->y);
+		if (!isPositionHeld(new_position)) {
+			positions.push_back(new_position);
+		}
+	}
+
+	return positions;
+}
+
+void Level::skeletonRandomMove(size_t skeleton_id) {
+	std::vector<Position> positions = getNeighborhood(
+		skeletons[skeleton_id]->position
+	);
+	if (!positions.empty()) {
+		std::random_shuffle(positions.begin(), positions.end());
+
+		unholdPosition(skeletons[skeleton_id]->position);
+		skeletons[skeleton_id]->position = positions.front();
+		holdPosition(skeletons[skeleton_id]->position);
+	}
+}
+
+std::vector<Position> Level::findSkeletonPath(
+	size_t skeleton_id,
+	const Position& target
+) const {
+	std::vector<Position> path;
+
+	std::map<size_t, std::list<Position> > path_net;
+	makeSkeletonPathNet(
+		path_net,
+		skeletons.at(skeleton_id)->position,
+		1,
+		target
+	);
+	if (!path_net.empty()) {
+
+	}
+
+	return path;
+}
+
+bool Level::skeletonPathNetContains(
+	const std::map<size_t, std::list<Position> >& path_net,
+	const Position& position
+) const {
+	for (
+		std::map<size_t, std::list<Position> >::const_iterator i =
+			path_net.begin();
+		i != path_net.end();
+		++i
+	) {
+		if (
+			std::find(i->second.begin(), i->second.end(), position)
+			!= i->second.end()
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Level::makeSkeletonPathNet(
+	std::map<size_t, std::list<Position> >& path_net,
+	const Position& position,
+	size_t length,
+	const Position& target
+) const {
+	std::vector<Position> positions = getNeighborhood(position);
+	for (
+		std::vector<Position>::const_iterator i = positions.begin();
+		i != positions.end();
+		++i
+	) {
+		Position position = *i;
+		if (!skeletonPathNetContains(path_net, position)) {
+			path_net[length].push_back(position);
+			if (position == target) {
+				break;
+			}
+
+			makeSkeletonPathNet(path_net, position, length + 1, target);
+		}
+	}
+}
+
+void Level::makePath(
+	std::vector<Position>& path,
+	const Position& position,
+	const std::map<size_t, std::list<Position> >& path_net
+) const {
+
 }
