@@ -69,25 +69,6 @@ private:
 	void killSkeleton(size_t skeleton_id);
 	std::vector<Position> getNeighborhood(const Position& position) const;
 	void skeletonRandomMove(size_t skeleton_id);
-	std::vector<Position> findSkeletonPath(
-		size_t skeleton_id,
-		const Position& target
-	) const;
-	bool skeletonPathNetContains(
-		const std::map<size_t, std::list<Position> >& path_net,
-		const Position& position
-	) const;
-	void makeSkeletonPathNet(
-		std::map<size_t, std::list<Position> >& path_net,
-		const Position& position,
-		size_t length,
-		const Position& target
-	) const;
-	void makePath(
-		std::vector<Position>& path,
-		const Position& position,
-		const std::map<size_t, std::list<Position> >& path_net
-	) const;
 };
 
 typedef boost::shared_ptr<Level> LevelSmartPointer;

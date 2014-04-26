@@ -156,10 +156,10 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 		throw std::runtime_error("invalid player id");
 	}
 
-	if (!players[player_id]->timeout()) {
+	/*if (!players[player_id]->timeout()) {
 		return false;
 	}
-	players[player_id]->update();
+	players[player_id]->update();*/
 
 	Position position = players[player_id]->position;
 	switch (direction) {
@@ -267,10 +267,8 @@ void Level::updateCastles(void) {
 					players[player_id]->position.y - i->second->position.y
 				);
 				if (
-					(delta_x == 1
-					&& delta_y == 0)
-					|| (delta_x == 0
-					&& delta_y == 1)
+					(delta_x == 1 && delta_y == 0)
+					|| (delta_x == 0 && delta_y == 1)
 				) {
 					size_t attack_value = getAttackValue(i->second->health);
 					decreasePlayerHealth(player_id, attack_value);
@@ -312,6 +310,28 @@ void Level::updateSkeletons(void) {
 		i->second->update();
 
 		skeletonRandomMove(i->first);
+
+		for (
+			std::map<size_t, PlayerSmartPointer>::const_iterator j =
+				players.begin();
+			j != players.end();
+			++j
+		) {
+			size_t player_id = j->first;
+			int delta_x = std::abs(
+				players[player_id]->position.x - i->second->position.x
+			);
+			int delta_y =std::abs(
+				players[player_id]->position.y - i->second->position.y
+			);
+			if (
+				(delta_x == 1 && delta_y == 0)
+				|| (delta_x == 0 && delta_y == 1)
+			) {
+				size_t attack_value = getAttackValue(i->second->health);
+				decreasePlayerHealth(player_id, attack_value);
+			}
+		}
 	}
 }
 
@@ -357,9 +377,15 @@ size_t Level::getAttackValue(size_t base_value) const {
 		/ RAND_MAX
 		* (MAXIMAL_ATTACK_FACTOR - MINIMAL_ATTACK_FACTOR)
 		+ MINIMAL_ATTACK_FACTOR;
-	float value = REAL_ATTACK_FACTOR * base_value / REAL_HEALHT_FACTOR;
+	float advance_value = REAL_ATTACK_FACTOR * base_value / REAL_HEALHT_FACTOR;
+	size_t value = static_cast<size_t>(
+		std::floor(attack_factor * advance_value + 0.5f)
+	);
+	if (value == 0) {
+		value = 1;
+	}
 
-	return static_cast<size_t>(std::floor(attack_factor * value + 0.5f));
+	return value;
 }
 
 size_t Level::getCastleByPosition(const Position& position) const {
@@ -521,77 +547,4 @@ void Level::skeletonRandomMove(size_t skeleton_id) {
 		skeletons[skeleton_id]->position = positions.front();
 		holdPosition(skeletons[skeleton_id]->position);
 	}
-}
-
-std::vector<Position> Level::findSkeletonPath(
-	size_t skeleton_id,
-	const Position& target
-) const {
-	std::vector<Position> path;
-
-	std::map<size_t, std::list<Position> > path_net;
-	makeSkeletonPathNet(
-		path_net,
-		skeletons.at(skeleton_id)->position,
-		1,
-		target
-	);
-	if (!path_net.empty()) {
-
-	}
-
-	return path;
-}
-
-bool Level::skeletonPathNetContains(
-	const std::map<size_t, std::list<Position> >& path_net,
-	const Position& position
-) const {
-	for (
-		std::map<size_t, std::list<Position> >::const_iterator i =
-			path_net.begin();
-		i != path_net.end();
-		++i
-	) {
-		if (
-			std::find(i->second.begin(), i->second.end(), position)
-			!= i->second.end()
-		) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void Level::makeSkeletonPathNet(
-	std::map<size_t, std::list<Position> >& path_net,
-	const Position& position,
-	size_t length,
-	const Position& target
-) const {
-	std::vector<Position> positions = getNeighborhood(position);
-	for (
-		std::vector<Position>::const_iterator i = positions.begin();
-		i != positions.end();
-		++i
-	) {
-		Position position = *i;
-		if (!skeletonPathNetContains(path_net, position)) {
-			path_net[length].push_back(position);
-			if (position == target) {
-				break;
-			}
-
-			makeSkeletonPathNet(path_net, position, length + 1, target);
-		}
-	}
-}
-
-void Level::makePath(
-	std::vector<Position>& path,
-	const Position& position,
-	const std::map<size_t, std::list<Position> >& path_net
-) const {
-
 }
