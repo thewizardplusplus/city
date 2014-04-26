@@ -155,6 +155,11 @@ bool Level::movePlayer(size_t player_id, Direction direction) {
 		throw std::runtime_error("invalid player id");
 	}
 
+	if (!players[player_id]->timeout()) {
+		return false;
+	}
+	players[player_id]->update();
+
 	Position position = players[player_id]->position;
 	switch (direction) {
 		case DIRECTION_UP:
@@ -245,6 +250,11 @@ void Level::updateCastles(void) {
 		}
 
 		// отвечаем на атаки противников
+		if (!i->second->timeout()) {
+			continue;
+		}
+		i->second->update();
+
 		std::set<size_t>::const_iterator j = i->second->enemies.begin();
 		while (j != i->second->enemies.end()) {
 			size_t player_id = *j++;
