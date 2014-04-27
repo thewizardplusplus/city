@@ -2,13 +2,22 @@
 #include "GraphicsScene.h"
 #include "DynamicSprite.h"
 #include <QtGui/QKeyEvent>
-#include <QtGui/QGridLayout>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QApplication>
 #include <QtCore/QFile>
-#include <QtGui/QMessageBox>
 #include <QtCore/QDebug>
-#include <QtGui/QGraphicsPixmapItem>
+#include <QtCore/QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QGridLayout>
+	#include <QtWidgets/QGraphicsView>
+	#include <QtWidgets/QApplication>
+	#include <QtWidgets/QMessageBox>
+	#include <QtWidgets/QGraphicsPixmapItem>
+#else
+	#include <QtGui/QGridLayout>
+	#include <QtGui/QGraphicsView>
+	#include <QtGui/QApplication>
+	#include <QtGui/QMessageBox>
+	#include <QtGui/QGraphicsPixmapItem>
+#endif
 
 MainWindow::MainWindow(void) :
 	graphics_scene(NULL),

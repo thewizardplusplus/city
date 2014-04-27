@@ -1,5 +1,10 @@
 #include "MainWindow.h"
-#include <QtGui/QApplication>
+#include <QtCore/QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QApplication>
+#else
+	#include <QtGui/QApplication>
+#endif
 
 int main(int arguments_number, char* arguments[]) {
 	QApplication application(arguments_number, arguments);

@@ -4,8 +4,14 @@
 #include "MoveDirection.h"
 #include "DynamicSprite.h"
 #include "Client.h"
-#include <QtGui/QMainWindow>
-#include <QtGui/QGraphicsScene>
+#include <QtCore/QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QMainWindow>
+	#include <QtWidgets/QGraphicsScene>
+#else
+	#include <QtGui/QMainWindow>
+	#include <QtGui/QGraphicsScene>
+#endif
 #include <QtCore/QThread>
 
 class MainWindow : public QMainWindow {

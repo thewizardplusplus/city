@@ -1,7 +1,12 @@
 #ifndef DYNAMICSPRITE_H
 #define DYNAMICSPRITE_H
 
-#include <QtGui/QGraphicsItemGroup>
+#include <QtCore/QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	#include <QtWidgets/QGraphicsItemGroup>
+#else
+	#include <QtGui/QGraphicsItemGroup>
+#endif
 
 class DynamicSprite : public QGraphicsItemGroup {
 public:

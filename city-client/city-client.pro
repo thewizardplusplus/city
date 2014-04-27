@@ -3,8 +3,11 @@ win32:BOOST_INCLUDES_PATH = E:\\boost_1_54_0
 win32:BOOST_LIBS_PATH = E:\\boost_1_54_0\\stage\\lib
 
 # общие настройки
-CONFIG += warn_on
+equals(QT_MAJOR_VERSION, 5) {
+	QT += widgets
+}
 QT += svg
+CONFIG += warn_on
 
 # файлы проекта
 HEADERS += \

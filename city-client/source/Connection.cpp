@@ -10,7 +10,8 @@ using namespace boost::program_options;
 Connection::Connection(void) :
 	socket(io_service, udp::endpoint(udp::v4(), LOCAL_PORT))
 {
-	ConnectionOptions connection_options = loadConnectionOptions();
+	//ConnectionOptions connection_options = loadConnectionOptions();
+	ConnectionOptions connection_options("46.36.222.89", 8001);
 	receiver_endpoint = resolve(connection_options);
 }
 
